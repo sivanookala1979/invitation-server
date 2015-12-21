@@ -11,6 +11,7 @@ InvtappServer::Application.routes.draw do
 
   resources :users do
     get :create_user, :on => :collection
+    get :login, :on => :collection
   end
 
   # The priority is based upon order of creation:
