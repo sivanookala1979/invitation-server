@@ -1,0 +1,27 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  event_name: MyString
+  end_date: 2015-12-18
+  description: MyString
+  latitude: 1.5
+  longitude: 1.5
+  address: MyString
+  private: false
+  remainder: false
+  status: MyString
+  owner_id: 1
+  start_date: 2015-12-18
+
+two:
+  event_name: MyString
+  end_date: 2015-12-18
+  description: MyString
+  latitude: 1.5
+  longitude: 1.5
+  address: MyString
+  private: false
+  remainder: false
+  status: MyString
+  owner_id: 1
+  start_date: 2015-12-18
