@@ -4,7 +4,7 @@ class CreateUserLocations < ActiveRecord::Migration
       t.integer :user_id
       t.float :latitude
       t.float :longitude
-      t.string :time
+      t.datetime :time
 
       t.timestamps
     end

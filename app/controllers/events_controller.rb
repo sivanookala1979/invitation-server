@@ -80,19 +80,19 @@ class EventsController < ApplicationController
   end
 
   def create_invitations
-    participant_mobile_numbers = params[:parcipant_mobile_numbers]
+    participant_mobile_numbers = params[:participant_mobile_numbers]
     participant_mobile_numbers= participant_mobile_numbers.to_a
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     user_invitation = User.find_by_id(user_access_token.user_id)
     participant_mobile_numbers.each do |participant_mobile_number|
       invitation = Invitation.new
       user=User.find_by_phone_number(participant_mobile_number)
-      invitation.event_id = params[:event_id]
-      invitation.participant_id = user.id
-      invitation.save
-
+      if user.present?
+        invitation.event_id = params[:event_id]
+        invitation.participant_id = user.id
+        invitation.save
+      end
     end
-
     invitation = Invitation.new
     invitation.event_id = params[:event_id]
     invitation.participant_id = user_invitation.id
@@ -114,10 +114,20 @@ class EventsController < ApplicationController
 
   def get_my_events
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    if user_access_token.present?
     user = User.find_by_id(user_access_token.user_id)
-    events = Event.find_all_by_owner_id(user.id)
+    if !params[:event_ids].blank?
+      all_my_events = Event.where('id in (?)', params[:event_ids].split(', '))
+      else
+        all_my_events = Event.find_all_by_owner_id(user.id)
+    end
+    end
     if request.format == 'json'
-      render :json => {:events => events}
+      if user_access_token.present?
+        render :json => {:events => all_my_events}
+      else
+        render :json => {:status => "Invalid Authentication you are not allow to do this action"}
+      end
     end
 
   end
@@ -130,7 +140,7 @@ class EventsController < ApplicationController
     user_location.latitude = params[:latitude]
     user_location.longitude = params[:longitude]
     user_location.time= params[:time]
-    user_loaction.save
+    user_location.save
     if request.format == 'json'
       render :json => {:status => "Success"}
     end
@@ -156,9 +166,9 @@ class EventsController < ApplicationController
     invitation_details.save
     if request.format == 'json'
       if invitation_details.is_accepted
-        render :json => {:status => "Invitation successfully created"}
+        render :json => {:status => "Invitation Accepterd"}
       else
-        render :json => {:status => "Please create the invitation"}
+        render :json => {:status => "Invitation Rejected"}
       end
     end
   end
