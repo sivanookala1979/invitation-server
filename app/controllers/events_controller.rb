@@ -105,10 +105,14 @@ class EventsController < ApplicationController
 
   def get_my_invitations
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    if user_access_token.present?
     user = User.find_by_id(user_access_token.user_id)
     invitation =Invitation.find_all_by_participant_id(user.id)
     if request.format == 'json'
       render :json => {:invitation => invitation}
+    end
+    else
+      render :json => {:status => 'Invalid User Details'}
     end
   end
 

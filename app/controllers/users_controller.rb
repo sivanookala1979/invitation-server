@@ -85,14 +85,14 @@ class UsersController < ApplicationController
   def login
     status=''
     user = User.find_by_phone_number(params[:phone_number])
-    user_access_token = UserAccessTokens.find_by_user_id(user.id)
     if request.format == 'json'
-    if !user_access_token.blank?
+      if !user.blank?
+        user_access_token = UserAccessTokens.find_by_user_id(user.id)
       render :json => { :access_token => user_access_token.access_token}
+
     else
       render :json => { :status=> "User not exist with this mobile number"}
-    end
-
+      end
     end
     end
 
