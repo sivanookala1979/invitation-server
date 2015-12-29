@@ -1,0 +1,23 @@
+<div class="wrapper">
+<%= get_index_text("Listing User Locations") %>
+
+<div class="row">
+  <div class="col-sm-12">
+    <table class="table table-bordered">
+      <tr class="table_style">
+        <th>Latitude</th>
+        <th>Longitude</th>
+        <th>Time</th>
+
+      </tr>
+      <% @user_locations.each do |user_location| %>
+          <tr>
+
+            <td><%= user_location.latitude %></td>
+            <td><%= user_location.longitude %></td>
+            <td><%= user_location.time %></td>
+      <% end %>
+    </table>
+  </div>
+</div>
+</div>

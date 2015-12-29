@@ -1,0 +1,26 @@
+<div class ="wrapper">
+  <%= get_index_text("Listing Event Invitations") %>
+<div class="row">
+  <div class="col-sm-12">
+    <table class="table table-bordered">
+      <tr class="table_style">
+        <th>Participant Name</th>
+        <th>Mobile Number</th>
+        <th>Is Accepted</th>
+        <th></th>
+      </tr>
+
+      <% @event_invitation.each do |event_invitation| %>
+          <tr>
+            <%participant = User.find_by_id(event_invitation.participant_id) %>
+            <td><%= participant.user_name %></td>
+            <td><%= participant.phone_number %></td>
+            <td><%= event_invitation.is_accepted %></td>
+            <td><a href="/events/user_locations?participant_id=<%= participant.id %>">User Location</a></td>
+
+      <% end %>
+
+    </table>
+      </div>
+    </div>
+    </div>

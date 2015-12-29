@@ -1,14 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>InvtappServer</title>
-  <%= stylesheet_link_tag    "application" %>
+  <title>Invitation App Server</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <%= stylesheet_link_tag "application" %>
   <%= javascript_include_tag "application" %>
   <%= csrf_meta_tags %>
 </head>
 <body>
+<div class="row" style="background-color:#489ED5;padding: 20px 40px;">
 
-<%= yield %>
+  <div class="col-sm-4" style="font-size: 24px;color: #ffffff;font-weight: bolder;">Invitation
+    App Server
+  </div>
+  <div class="col-sm-8" align="right">
+    <a href='/users' class="home_main_icons_style">Users
+    </a>
+    <a href='/events' class="home_main_icons_style">Events</a>
+  </div>
+</div>
+<div id="main-container" style="margin-top: 30px">
+  <%= yield %>
+</div>
+<script>
+    $('.datepicker').datepicker({
+        format: "dd-mm-yyyy",
+        autoclose: true
+    });
 
+</script>
 </body>
 </html>
+
+
+

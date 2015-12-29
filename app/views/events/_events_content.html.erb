@@ -1,0 +1,44 @@
+<div class="row">
+  <div class="col-sm-12">
+    <table class="table table-bordered">
+      <tr class="table_style">
+        <th>Event name</th>
+        <th>Start date</th>
+        <th>End date</th>
+        <th>Description</th>
+        <th>Latitude</th>
+        <th>Longitude</th>
+        <th>Address</th>
+        <th>Status</th>
+        <th>Owner</th>
+        <th>Invitees Count</th>
+        <th>Accepted Invitees</th>
+        <th>Rejected Invitees</th>
+        <th></th>
+        <th></th>
+        <th></th>
+      </tr>
+      <% @events.each do |event| %>
+          <tr>
+            <td><%= event.event_name %></td>
+            <td><%= get_time_format(event.start_date) %></td>
+            <td><%= get_time_format(event.end_date) %></td>
+            <td><%= event.description %></td>
+            <td><%= event.latitude %></td>
+            <td><%= event.longitude %></td>
+            <td><%= event.address %></td>
+            <td><%= event.status %></td>
+            <% owner_name = User.find_by_id(event.owner_id) %>
+            <td><%= owner_name.user_name if !owner_name.blank? %></td>
+            <td><%= event.invitees_count %></td>
+            <td><%= event.accepted_count %></td>
+            <td><%= event.rejected_count %></td>
+            <td><a href="/events/event_invitations?id=<%= event.id %>">Invitees</a></td>
+            <td><a href="/events/event_user_locations?event_id=<%= event.id %>">Invitees Locations</a></td>
+            <td><%= link_to 'Edit', edit_event_path(event) %></td>
+          </tr>
+      <% end %>
+    </table>
+
+  </div>
+</div>

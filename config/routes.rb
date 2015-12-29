@@ -7,12 +7,17 @@ InvtappServer::Application.routes.draw do
     post :post_location, :on => :collection
     get :get_participants_locations, :on => :collection
     get :accept_or_reject_invitation, :on => :collection
+    get :event_invitations, :on => :collection
+    get :user_locations, :on => :collection
+    get :event_user_locations, :on => :collection
   end
 
   resources :users do
     get :create_user, :on => :collection
     get :login, :on => :collection
+    get :home_page, :on => :collection
   end
+
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
@@ -63,7 +68,7 @@ InvtappServer::Application.routes.draw do
 
   # You can have the root of your site routed with "root"
   # just remember to delete public/index.html.
-  # root :to => 'welcome#index'
+  root :to => 'users#index'
 
   # See how all your routes lay out with "rake routes"
 

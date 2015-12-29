@@ -1,0 +1,91 @@
+/*
+ * This is a manifest file that'll automatically include all the stylesheets available in this directory
+ * and any sub-directories. You're free to add application-wide styles to this file and they'll appear at
+ * the top of the compiled file, but it's generally better to create a new file per style scope.
+ *= require_self
+ *= require_tree .
+
+*/
+@import "bootstrap";
+.wrapper {
+    text-align: left;
+    margin: 0 auto;
+    width: 69em;
+}
+
+.home_main_icons_style {
+    color: #000000;
+    font-family: 'myriadpro';
+    font-size: 16px;
+    padding: 5px 10px;
+    background-color: #ffffff;
+  margin: 0px 10px;
+    border-radius: 10px;
+
+}
+
+.home_main_icons_style:hover {
+    color: #000000;
+    text-decoration: none;
+    background-color: #ffffff;
+
+}
+
+.home_main_icons_style:focus {
+    color: #000000;
+    text-decoration: none;
+
+}
+
+.home_main_icons_style:active {
+    color: #000000;
+    text-decoration: none;
+
+}
+.top_menu_ul {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+
+}
+
+.top_menu_ul li {
+    display: inline-block;
+    padding: 10px 5px;
+}
+
+.table_style {
+  color: #ffffff;
+  background-color: #37A4D5;
+  font-family: 'Raleway Regular';
+  font-size: 16px;
+  padding-right: 16px;
+
+}
+
+.wrapper {
+  padding-left: 5px;
+}
+.wrapper {
+  width: 90%;
+  margin: 0 auto;
+}
+.head_style {
+  color: #37A4D5;
+  font-size: 18px;
+  font-family: 'Raleway Regular';
+  font-weight: 900;
+  margin: 12px
+}
+.filter_text_box1 {
+  width: 77%;
+  color: #333333;
+  border: 0px solid #ffffff;
+  font-size: 14px;
+  font-family: "Raleway Regular";
+  padding: 10px 10px 10px 10px;
+  border-radius: 3px;
+  margin-bottom: 10px;
+  border: 1px solid #969696;
+
+}

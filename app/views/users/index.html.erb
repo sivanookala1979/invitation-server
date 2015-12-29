@@ -1,13 +1,15 @@
-<h1>Listing users</h1>
-
-<table>
-  <tr>
-    <th>User name</th>
-    <th>Phone number</th>
-    <th></th>
-    <th></th>
-    <th></th>
-  </tr>
+<div class ="wrapper">
+  <%= get_index_text("Listing Users") %>
+<div class="row">
+  <div class="col-sm-12">
+    <table class="table table-bordered">
+      <tr class="table_style">
+        <th>User name</th>
+        <th>Phone number</th>
+        <th></th>
+        <th></th>
+        <th></th>
+      </tr>
 
 <% @users.each do |user| %>
   <tr>
@@ -22,4 +24,6 @@
 
 <br />
 
-<%= link_to 'New User', new_user_path %>
+  </div>
+</div>
+    </div>

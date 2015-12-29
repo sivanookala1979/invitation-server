@@ -1,0 +1,23 @@
+<div class ="wrapper">
+  <%= get_index_text("Listing User Locations") %>
+<div class="row">
+  <div class="col-sm-12">
+    <table class="table table-bordered">
+      <tr class="table_style">
+        <th>Name</th>
+        <th>Latitude</th>
+        <th>Longitude</th>
+        <th>Time</th>
+
+      </tr>
+      <%@event_user_locations.each do |user_location| %>
+          <tr>
+          <td><%= User.find_by_id(user_location.user_id).try(:user_name)%></td>
+            <td><%= user_location.latitude %></td>
+            <td><%= user_location.longitude %></td>
+            <td><%= get_time_format(user_location.time) %></td>
+      <% end %>
+    </table>
+  </div>
+</div>
+    </div>

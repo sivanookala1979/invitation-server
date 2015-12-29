@@ -3,9 +3,9 @@ class EventsController < ApplicationController
   # GET /events.json
   def index
     @events = Event.all
-
     respond_to do |format|
       format.html # index.html.erb
+      format.js
       format.json { render json: @events }
     end
   end
@@ -84,12 +84,18 @@ class EventsController < ApplicationController
     participant_mobile_numbers= participant_mobile_numbers.to_a
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     user_invitation = User.find_by_id(user_access_token.user_id)
+    invitees_count=0
     participant_mobile_numbers.each do |participant_mobile_number|
+
       invitation = Invitation.new
+      invitees_count = 0
       user=User.find_by_phone_number(participant_mobile_number)
       if user.present?
         invitation.event_id = params[:event_id]
+        event_invitation = Event.find_by_id(invitation.event_id)
+        event_invitation.invitees_count = invitees_count+1
         invitation.participant_id = user.id
+        invitation.invitees_count=invitees_count+1
         invitation.save
       end
     end
@@ -144,6 +150,8 @@ class EventsController < ApplicationController
     user_location.latitude = params[:latitude]
     user_location.longitude = params[:longitude]
     user_location.time= params[:time]
+    user_location.user_name= user.user_name
+    user_location.user_mobile_number = user.phone_number
     user_location.save
     if request.format == 'json'
       render :json => {:status => "Success"}
@@ -163,10 +171,18 @@ class EventsController < ApplicationController
   end
 
   def accept_or_reject_invitation
+    is_accepted_count=0
+    is_rejected_count=0
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     user = User.find_by_id(user_access_token.user_id)
     invitation_details =Invitation.find_by_event_id_and_participant_id(params[:event_id], user.id)
+    event_invitation = Event.find_by_id(params[:event_id])
     invitation_details.is_accepted=params[:accepted]
+    if (invitation_details.is_accepted.eql?(true))
+      event_invitation.accepted_count =is_accepted_count+1
+    else
+      event_invitation.rejected_count = is_rejected_count+1
+    end
     invitation_details.save
     if request.format == 'json'
       if invitation_details.is_accepted
@@ -194,6 +210,24 @@ class EventsController < ApplicationController
     end
   end
 
+  def event_invitations
+    @event_invitation = Invitation.find_all_by_event_id(params[:id])
+    @invitees_size = @event_invitation.size
+  end
+
+  def user_locations
+    @user_locations = UserLocation.find_all_by_user_id(params[:participant_id])
+  end
+
+  def event_user_locations
+    @event_invitations = Invitation.find_all_by_event_id(params[:event_id])
+    @event_user_locations = []
+    @event_invitations.each do|invitation|
+      user_location = UserLocation.find_by_user_id(invitation.participant_id)
+      @event_user_locations << user_location if user_location.present?
+    end
+
+  end
   # DELETE /events/1
   # DELETE /events/1.json
   def destroy
