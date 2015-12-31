@@ -86,6 +86,7 @@ class EventsController < ApplicationController
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     user_invitation = User.find_by_id(user_access_token.user_id)
     event_invitation = Event.find_by_id(params[:event_id])
+    event_invitation.invitees_count = 0 if event_invitation.invitees_count.blank?
     participant_mobile_numbers.each do |participant_mobile_number|
       invitation = Invitation.new
       user=User.find_by_phone_number(participant_mobile_number)
@@ -175,6 +176,8 @@ class EventsController < ApplicationController
     user = User.find_by_id(user_access_token.user_id)
     invitation_details =Invitation.find_by_event_id_and_participant_id(params[:event_id], user.id)
     event_invitation = Event.find_by_id(params[:event_id])
+    event_invitation.accepted_count = 0 if event_invitation.accepted_count.blank?
+    event_invitation.rejected_count = 0 if event_invitation.accepted_count.blank?
     invitation_details.is_accepted=params[:accepted]
     if (invitation_details.is_accepted.eql?(true))
       event_invitation.accepted_count =event_invitation.accepted_count+1
