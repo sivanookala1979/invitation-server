@@ -177,7 +177,7 @@ class EventsController < ApplicationController
     invitation_details =Invitation.find_by_event_id_and_participant_id(params[:event_id], user.id)
     event_invitation = Event.find_by_id(params[:event_id])
     event_invitation.accepted_count = 0 if event_invitation.accepted_count.blank?
-    event_invitation.rejected_count = 0 if event_invitation.accepted_count.blank?
+    event_invitation.rejected_count = 0 if event_invitation.rejected_count.blank?
     invitation_details.is_accepted=params[:accepted]
     if (invitation_details.is_accepted.eql?(true))
       event_invitation.accepted_count =event_invitation.accepted_count+1
