@@ -1,5 +1,6 @@
 class EventsController < ApplicationController
   include EventsHelper
+  include DateHelper
   # GET /events
   # GET /events.json
   def index
@@ -214,6 +215,7 @@ class EventsController < ApplicationController
 
   def event_invitations
     @event_invitation = Invitation.find_all_by_event_id(params[:id])
+    event = Event.find(params[:id])
     @invitees_size = @event_invitation.size
     invitation_details_list=[]
     @event_invitation.each do |invitation|
@@ -222,6 +224,9 @@ class EventsController < ApplicationController
       user = User.find(invitation.participant_id)
       invitation_details.name=user.user_name
       invitation_details.mobile=user.phone_number
+      user_location = UserLocation.find_by_user_id(user.id)
+      invitation_details.distance= getDistanceFromLatLonInKm(event.latitude, event.longitude, user_location.latitude, user_location.longitude)
+      invitation_details.update_at=distance_of_time_in_words(user_location.time, Time.now)
       invitation_details_list<<invitation_details
     end
     if request.format == 'json'
