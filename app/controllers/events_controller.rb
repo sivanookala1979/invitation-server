@@ -1,6 +1,6 @@
 class EventsController < ApplicationController
   include EventsHelper
-  include DateHelper
+  include ApplicationHelper
   # GET /events
   # GET /events.json
   def index
@@ -225,8 +225,10 @@ class EventsController < ApplicationController
       invitation_details.name=user.user_name
       invitation_details.mobile=user.phone_number
       user_location = UserLocation.find_by_user_id(user.id)
-      invitation_details.distance= getDistanceFromLatLonInKm(event.latitude, event.longitude, user_location.latitude, user_location.longitude)
-      invitation_details.update_at=distance_of_time_in_words(user_location.time, Time.now)
+      if user_location.present?
+        invitation_details.distance= getDistanceFromLatLonInKm(event.latitude, event.longitude, user_location.latitude, user_location.longitude)
+        invitation_details.update_at=distance_of_time_in_words(user_location.time, Time.now)
+      end
       invitation_details_list<<invitation_details
     end
     if request.format == 'json'
