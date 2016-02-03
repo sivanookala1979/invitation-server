@@ -120,11 +120,11 @@ class EventsController < ApplicationController
   def get_my_invitations
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     if user_access_token.present?
-    user = User.find_by_id(user_access_token.user_id)
-    invitation =Invitation.find_all_by_participant_id(user.id)
-    if request.format == 'json'
-      render :json => {:invitation => invitation}
-    end
+      user = User.find_by_id(user_access_token.user_id)
+      invitation =Invitation.find_all_by_participant_id(user.id)
+      if request.format == 'json'
+        render :json => {:invitation => invitation}
+      end
     else
       render :json => {:status => 'Invalid User Details'}
     end
@@ -133,12 +133,12 @@ class EventsController < ApplicationController
   def get_my_events
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     if user_access_token.present?
-    user = User.find_by_id(user_access_token.user_id)
-    if !params[:event_ids].blank?
-      all_my_events = Event.where('id in (?)', params[:event_ids].split(', '))
+      user = User.find_by_id(user_access_token.user_id)
+      if !params[:event_ids].blank?
+        all_my_events = Event.where('id in (?)', params[:event_ids].split(', '))
       else
         all_my_events = Event.find_all_by_owner_id(user.id)
-    end
+      end
     end
     if request.format == 'json'
       if user_access_token.present?
@@ -248,7 +248,7 @@ class EventsController < ApplicationController
       invitation_details_list<<invitation_details
     end
     if request.format == 'json'
-      render :json => {:participants_list=> invitation_details_list}
+      render :json => {:participants_list => invitation_details_list}
     end
   end
 
@@ -262,6 +262,7 @@ class EventsController < ApplicationController
             distance = getDistanceFromLatLonInKm(event.latitude, event.longitude, user_location.latitude, user_location.longitude)
             if distance<1
               invitation.is_check_in=true
+              event.check_in_count=0 if event.check_in_count.blank?
               event.check_in_count =event.check_in_count+1
               event.save
               invitation.save
@@ -279,12 +280,13 @@ class EventsController < ApplicationController
   def event_user_locations
     @event_invitations = Invitation.find_all_by_event_id(params[:event_id])
     @event_user_locations = []
-    @event_invitations.each do|invitation|
+    @event_invitations.each do |invitation|
       user_location = UserLocation.find_by_user_id(invitation.participant_id)
       @event_user_locations << user_location if user_location.present?
     end
 
   end
+
   # DELETE /events/1
   # DELETE /events/1.json
   def destroy
@@ -302,17 +304,20 @@ class EventsController < ApplicationController
     user = User.find_by_id(user_access_token.user_id)
     event = Event.find(params[:id])
     invitation = Invitation.find_by_event_id_and_participant_id(event.id, user.id)
-    if params[:status].eql?('CheckIn')
-      invitation.is_check_in=true
-      event.check_in_count =event.check_in_count+1
-      event.save
-    elsif params[:status].eql?('NotGoing')
-      invitation.is_accepted=false
-    end
-      invitation.save
-      if request.format == 'json'
-        render :json => {:status=> 'Success'}
+    if invitation.present?
+      if params[:status].eql?('CheckIn')
+        invitation.is_check_in=true
+        event.check_in_count=0 if event.check_in_count.blank?
+        event.check_in_count=event.check_in_count+1
+        event.save
+      elsif params[:status].eql?('NotGoing')
+        invitation.is_accepted=false
       end
+      invitation.save
+    end
+    if request.format == 'json'
+      render :json => {:status => invitation.present? ? 'Success' : 'FAILED'}
+    end
   end
 
   def get_distance_from_event
@@ -322,9 +327,9 @@ class EventsController < ApplicationController
     user_location = UserLocation.find_by_user_id(user.id)
     if request.format == 'json'
       if user_location.present?
-      render :json => {:status=>'Success', :distance=> getDistanceFromLatLonInKm(event.latitude, event.longitude, user_location.latitude, user_location.longitude)}
+        render :json => {:status => 'Success', :distance => getDistanceFromLatLonInKm(event.latitude, event.longitude, user_location.latitude, user_location.longitude)}
       else
-        render :json => {:status=>'Failed to get distance.'}
+        render :json => {:status => 'Failed to get distance.'}
       end
     end
 
