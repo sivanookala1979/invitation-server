@@ -62,8 +62,12 @@ class EventsController < ApplicationController
       event = params[:event]
       new_event=Event.new
       new_event.event_name = event[:event_name]
+      puts event[:start_date]
       new_event.start_date = Time.parse(event[:start_date]).utc.in_time_zone('Kolkata')
+      puts new_event.start_date
+      puts event[:end_date]
       new_event.end_date = Time.parse(event[:end_date]).utc.in_time_zone('Kolkata')
+      puts new_event.end_date
       new_event.description = event[:description]
       new_event.latitude = event[:latitude]
       new_event.longitude = event[:longitude]
