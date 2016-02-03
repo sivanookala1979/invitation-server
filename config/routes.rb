@@ -10,6 +10,8 @@ InvtappServer::Application.routes.draw do
     get :event_invitations, :on => :collection
     get :user_locations, :on => :collection
     get :event_user_locations, :on => :collection
+    get :get_distance_from_event, :on => :collection
+    get :invitee_check_in_Status, :on => :collection
   end
 
   resources :users do

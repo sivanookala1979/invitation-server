@@ -62,14 +62,16 @@ class EventsController < ApplicationController
       event = params[:event]
       new_event=Event.new
       new_event.event_name = event[:event_name]
-      new_event.start_date = event[:start_date]
-      new_event.end_date = event[:end_date]
+      new_event.start_date = Time.parse(event[:start_date])
+      new_event.end_date = Time.parse(event[:end_date])
       new_event.description = event[:description]
       new_event.latitude = event[:latitude]
       new_event.longitude = event[:longitude]
       new_event.address= event[:address]
       new_event.private= event[:private]
       new_event.remainder= event[:remainder]
+      new_event.is_manual_check_in= event[:is_manual_check_in]
+      new_event.check_in_count = 0
       new_event.status= "Created"
       new_event.owner_id = user.id
       new_event.save
@@ -89,19 +91,25 @@ class EventsController < ApplicationController
     event_invitation = Event.find_by_id(params[:event_id])
     event_invitation.invitees_count = 0 if event_invitation.invitees_count.blank?
     participant_mobile_numbers.each do |participant_mobile_number|
-      invitation = Invitation.new
       user=User.find_by_phone_number(participant_mobile_number)
       if user.present?
-        invitation.event_id = event_invitation.id
-        event_invitation.invitees_count = event_invitation.invitees_count+1
-        invitation.participant_id = user.id
-        invitation.save
+        invitation =Invitation.find_by_event_id_and_participant_id(params[:event_id], user.id)
+        if invitation.blank?
+          invitation = Invitation.new
+          invitation.event_id = event_invitation.id
+          event_invitation.invitees_count = event_invitation.invitees_count+1
+          invitation.participant_id = user.id
+          invitation.save
+        end
       end
     end
-    invitation = Invitation.new
-    invitation.event_id = params[:event_id]
-    invitation.participant_id = user_invitation.id
-    invitation.save
+    owner_invitation =Invitation.find_by_event_id_and_participant_id(params[:event_id], user_invitation.id)
+    if owner_invitation.blank?
+      invitation = Invitation.new
+      invitation.event_id = params[:event_id]
+      invitation.participant_id = user_invitation.id
+      invitation.save
+    end
     event_invitation.invitees_count = event_invitation.invitees_count+1
     event_invitation.save
     if request.format == 'json'
@@ -214,8 +222,16 @@ class EventsController < ApplicationController
   end
 
   def event_invitations
-    @event_invitation = Invitation.find_all_by_event_id(params[:id])
     event = Event.find(params[:id])
+    update_auto_checkIn_status(event)
+    @event_invitation = Invitation.find_all_by_event_id(params[:id])
+    if params[:status].present?
+      if !params[:status].eql?('NotGoing')
+        @event_invitation = Invitation.find_all_by_event_id_and_is_check_in(params[:id], params[:status].eql?('CheckIn'))
+      else
+        @event_invitation = Invitation.find_all_by_event_id_and_is_accepted(params[:id], false)
+      end
+    end
     @invitees_size = @event_invitation.size
     invitation_details_list=[]
     @event_invitation.each do |invitation|
@@ -233,6 +249,26 @@ class EventsController < ApplicationController
     end
     if request.format == 'json'
       render :json => {:participants_list=> invitation_details_list}
+    end
+  end
+
+  def update_auto_checkIn_status(event)
+    if !event.is_manual_check_in
+      if event.start_date>Time.now
+        event_invitations = Invitation.find_all_by_event_id_and_is_check_in_and_is_accepted(params[:id], false, true)
+        event_invitations.each do |invitation|
+          user_location = UserLocation.find_by_user_id(invitation.participant_id)
+          if user_location.present?
+            distance = getDistanceFromLatLonInKm(event.latitude, event.longitude, user_location.latitude, user_location.longitude)
+            if distance<1
+              invitation.is_check_in=true
+              event.check_in_count =event.check_in_count+1
+              event.save
+              invitation.save
+            end
+          end
+        end
+      end
     end
   end
 
@@ -259,5 +295,38 @@ class EventsController < ApplicationController
       format.html { redirect_to events_url }
       format.json { head :ok }
     end
+  end
+
+  def invitee_check_in_Status
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    user = User.find_by_id(user_access_token.user_id)
+    event = Event.find(params[:id])
+    invitation = Invitation.find_by_event_id_and_participant_id(event.id, user.id)
+    if params[:status].eql?('CheckIn')
+      invitation.is_check_in=true
+      event.check_in_count =event.check_in_count+1
+      event.save
+    elsif params[:status].eql?('NotGoing')
+      invitation.is_accepted=false
+    end
+      invitation.save
+      if request.format == 'json'
+        render :json => {:status=> 'Success'}
+      end
+  end
+
+  def get_distance_from_event
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    user = User.find_by_id(user_access_token.user_id)
+    event = Event.find(params[:event_id])
+    user_location = UserLocation.find_by_user_id(user.id)
+    if request.format == 'json'
+      if user_location.present?
+      render :json => {:status=>'Success', :distance=> getDistanceFromLatLonInKm(event.latitude, event.longitude, user_location.latitude, user_location.longitude)}
+      else
+        render :json => {:status=>'Failed to get distance.'}
+      end
+    end
+
   end
 end
