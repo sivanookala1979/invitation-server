@@ -244,7 +244,7 @@ class EventsController < ApplicationController
       user = User.find(invitation.participant_id)
       invitation_details.name=user.user_name
       invitation_details.mobile=user.phone_number
-      user_location = UserLocation.find_by_user_id(user.id)
+      user_location = UserLocation.where('user_id=?', user.id).last
       if user_location.present?
         invitation_details.distance= getDistanceFromLatLonInKm(event.latitude, event.longitude, user_location.latitude, user_location.longitude)
         invitation_details.update_at=distance_of_time_in_words(user_location.time, Time.now)
@@ -261,7 +261,7 @@ class EventsController < ApplicationController
       if event.start_date>Time.now
         event_invitations = Invitation.find_all_by_event_id_and_is_check_in_and_is_accepted(params[:id], false, true)
         event_invitations.each do |invitation|
-          user_location = UserLocation.find_by_user_id(invitation.participant_id)
+          user_location = UserLocation.where('user_id=?', invitation.participant_id).last
           if user_location.present?
             distance = getDistanceFromLatLonInKm(event.latitude, event.longitude, user_location.latitude, user_location.longitude)
             if distance<1
@@ -285,7 +285,7 @@ class EventsController < ApplicationController
     @event_invitations = Invitation.find_all_by_event_id(params[:event_id])
     @event_user_locations = []
     @event_invitations.each do |invitation|
-      user_location = UserLocation.find_by_user_id(invitation.participant_id)
+      user_location = UserLocation.where('user_id=?', invitation.participant_id).last
       @event_user_locations << user_location if user_location.present?
     end
 
@@ -328,7 +328,7 @@ class EventsController < ApplicationController
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     user = User.find_by_id(user_access_token.user_id)
     event = Event.find(params[:event_id])
-    user_location = UserLocation.find_by_user_id(user.id)
+    user_location = UserLocation.where('user_id = ?', user.id).last
     if request.format == 'json'
       if user_location.present?
         render :json => {:status => 'Success', :distance => getDistanceFromLatLonInKm(event.latitude, event.longitude, user_location.latitude, user_location.longitude)}
