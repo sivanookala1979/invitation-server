@@ -230,10 +230,13 @@ class EventsController < ApplicationController
     update_auto_checkIn_status(event)
     @event_invitation = Invitation.find_all_by_event_id(params[:id])
     if params[:status].present?
-      if !params[:status].eql?('NotGoing')
+      if params[:status].eql?('CheckIn')
         @event_invitation = Invitation.find_all_by_event_id_and_is_check_in(params[:id], params[:status].eql?('CheckIn'))
-      else
+      elsif params[:status].eql?('Pending')
+        @event_invitation = Invitation.find_all_by_event_id_and_is_accepted_and_is_check_in(params[:id],true, false)
+      elsif params[:status].eql?('NotGoing')
         @event_invitation = Invitation.find_all_by_event_id_and_is_accepted(params[:id], false)
+
       end
     end
     @invitees_size = @event_invitation.size
