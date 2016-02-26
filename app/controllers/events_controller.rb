@@ -60,7 +60,8 @@ class EventsController < ApplicationController
     if !user_access_token.blank?
       user = User.find_by_id(user_access_token.user_id)
       event = params[:event]
-      new_event=Event.new
+      new_event =Event.find_by_id(params[:event_id]) if params[:event_id].present?
+      new_event=Event.new if new_event.blank?
       new_event.event_name = event[:event_name]
       puts event[:start_date]
       new_event.start_date = Time.parse(event[:start_date]).utc.in_time_zone('Kolkata')
@@ -75,15 +76,28 @@ class EventsController < ApplicationController
       new_event.private= event[:private]
       new_event.remainder= event[:remainder]
       new_event.is_manual_check_in= event[:is_manual_check_in]
+      new_event.is_recurring_event=event[:is_recurring_event]
+      new_event.recurring_type=event[:recurring_type]
+      new_event.event_theme=event[:event_theme]
+      new_event.hide=false
       new_event.check_in_count = 0
-      new_event.status= "Created"
+      new_event.status= "Created" if params[:event_id].blank?
       new_event.owner_id = user.id
       new_event.save
       if request.format == 'json'
-        render :json => {:id => new_event.id, :status => new_event.status}
+        render :json => {:id => new_event.id, :status => params[:event_id].present? ? new_event.status : 'Successfully Updated.'}
       else
         render :json => {:status => "Invalid Authentication you are not allow to do this action"}
       end
+    end
+  end
+
+  def delete_event
+    event = Event.find_by_id(params[:event_id])
+    event.hide = true
+    event.save
+    if request.format == 'json'
+      render :json => {:id => event.id, :status => 'Event Successfully deleted'}
     end
   end
 
@@ -93,29 +107,50 @@ class EventsController < ApplicationController
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     user_invitation = User.find_by_id(user_access_token.user_id)
     event_invitation = Event.find_by_id(params[:event_id])
-    event_invitation.invitees_count = 0 if event_invitation.invitees_count.blank?
+    group_ids =params[:group_ids].to_a
+    if group_ids.present?
+      group_ids.each do |group_id|
+        group = Group.find_by_id(group_id.to_i)
+        group_numbers = group.contact_numbers.split(',')
+        group_numbers.each do |group_number|
+          participant = User.find_by_phone_number(group_number)
+          if participant.present?
+            invitation = Invitation.find_by_participant_id_and_participant_mobile_number(participant.id, group_number)
+            if invitation.blank?
+              invitation = Invitation.new
+              invitation.participant_id = participant.id
+              invitation.participant_mobile_number = participant.phone_number
+              invitation.save
+            end
+          else
+            invitation = Invitation.new
+            invitation.participant_mobile_number = group_number
+          end
+          event_invitation.invitees_count = 0 if event_invitation.invitees_count.blank?
+          invitation.event_id = event_invitation.id
+          event_invitation.invitees_count = event_invitation.invitees_count+1
+          invitation.save
+        end
+      end
+    end
+
     participant_mobile_numbers.each do |participant_mobile_number|
       user=User.find_by_phone_number(participant_mobile_number)
       if user.present?
         invitation =Invitation.find_by_event_id_and_participant_id(params[:event_id], user.id)
         if invitation.blank?
           invitation = Invitation.new
-          invitation.event_id = event_invitation.id
-          event_invitation.invitees_count = event_invitation.invitees_count+1
           invitation.participant_id = user.id
-          invitation.save
+          invitation.participant_mobile_number=participant_mobile_number
         end
+      else
+        invitation = Invitation.new
+        invitation.participant_mobile_number=participant_mobile_number
       end
-    end
-    owner_invitation =Invitation.find_by_event_id_and_participant_id(params[:event_id], user_invitation.id)
-    if owner_invitation.blank?
-      invitation = Invitation.new
-      invitation.event_id = params[:event_id]
-      invitation.participant_id = user_invitation.id
+      invitation.event_id = event_invitation.id
+      event_invitation.invitees_count = event_invitation.invitees_count+1
       invitation.save
     end
-    event_invitation.invitees_count = event_invitation.invitees_count+1
-    event_invitation.save
     if request.format == 'json'
       render :json => {:status => 'Success'}
     end
@@ -143,6 +178,8 @@ class EventsController < ApplicationController
       else
         all_my_events = Event.find_all_by_owner_id(user.id)
       end
+      invitations =Invitation.find_all_by_participant_id(user.id)
+      all_my_events << Event.where('id in(?)', invitations.collect{|invitation| invitation.event_id})
     end
     if request.format == 'json'
       if user_access_token.present?
@@ -233,10 +270,9 @@ class EventsController < ApplicationController
       if params[:status].eql?('CheckIn')
         @event_invitation = Invitation.find_all_by_event_id_and_is_check_in(params[:id], params[:status].eql?('CheckIn'))
       elsif params[:status].eql?('Pending')
-        @event_invitation = Invitation.find_all_by_event_id_and_is_accepted_and_is_check_in(params[:id],true, false)
+        @event_invitation = Invitation.find_all_by_event_id_and_is_accepted_and_is_check_in(params[:id], true, false)
       elsif params[:status].eql?('NotGoing')
         @event_invitation = Invitation.find_all_by_event_id_and_is_accepted(params[:id], false)
-
       end
     end
     @invitees_size = @event_invitation.size
@@ -244,7 +280,9 @@ class EventsController < ApplicationController
     @event_invitation.each do |invitation|
       invitation_details = InvitationDetails.new
       invitation_details.is_accepted=invitation.is_accepted
-      user = User.find(invitation.participant_id)
+      user = User.find_by_id(invitation.participant_id)
+      user = User.find_by_phone_number(invitation.participant_mobile_number) if user.blank?
+      if user.present?
       invitation_details.name=user.user_name
       invitation_details.mobile=user.phone_number
       user_location = UserLocation.where('user_id=?', user.id).last
@@ -253,6 +291,7 @@ class EventsController < ApplicationController
         invitation_details.update_at=distance_of_time_in_words(user_location.time, Time.now)
       end
       invitation_details_list<<invitation_details
+      end
     end
     if request.format == 'json'
       render :json => {:participants_list => invitation_details_list}
