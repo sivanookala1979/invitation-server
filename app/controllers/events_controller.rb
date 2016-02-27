@@ -180,6 +180,7 @@ class EventsController < ApplicationController
       end
       invitations =Invitation.find_all_by_participant_id(user.id)
       all_my_events << Event.where('id in(?)', invitations.collect{|invitation| invitation.event_id})
+      all_my_events.flatten!
     end
     if request.format == 'json'
       if user_access_token.present?
