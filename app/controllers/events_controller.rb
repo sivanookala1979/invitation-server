@@ -120,7 +120,6 @@ class EventsController < ApplicationController
               invitation = Invitation.new
               invitation.participant_id = participant.id
               invitation.participant_mobile_number = participant.phone_number
-              invitation.save
             end
           else
             invitation = Invitation.new
@@ -148,6 +147,7 @@ class EventsController < ApplicationController
         invitation.participant_mobile_number=participant_mobile_number
       end
       invitation.event_id = event_invitation.id
+      event_invitation.invitees_count = 0 if event_invitation.invitees_count.blank?
       event_invitation.invitees_count = event_invitation.invitees_count+1
       invitation.save
     end
