@@ -88,7 +88,7 @@ class UsersController < ApplicationController
     if request.format == 'json'
       if !user.blank?
         user_access_token = UserAccessTokens.find_by_user_id(user.id)
-      render :json => { :access_token => user_access_token.access_token}
+      render :json => {:id => user.id, :access_token => user_access_token.access_token}
 
     else
       render :json => { :status=> "User not exist with this mobile number"}

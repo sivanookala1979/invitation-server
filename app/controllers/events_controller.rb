@@ -151,8 +151,9 @@ class EventsController < ApplicationController
       event_invitation.invitees_count = event_invitation.invitees_count+1
       invitation.save
     end
+    event_invitation.save
     if request.format == 'json'
-      render :json => {:status => 'Success'}
+      render :json => {:status => 'Success', :total_invites=>event_invitation.invitees_count}
     end
   end
 
@@ -174,13 +175,11 @@ class EventsController < ApplicationController
     if user_access_token.present?
       user = User.find_by_id(user_access_token.user_id)
       if !params[:event_ids].blank?
-        all_my_events = Event.where('id in (?)', params[:event_ids].split(', '))
+        all_my_events = Event.where('id in (?)', params[:event_ids].split(', ')).order('start_date DESC')
       else
-        all_my_events = Event.find_all_by_owner_id(user.id)
-        invitations =Invitation.find_all_by_participant_id(user.id)
-        all_my_events << Event.where('id in(?)', invitations.collect{|invitation| invitation.event_id})
-        all_my_events.flatten!
+        all_my_events = Event.where('owner_id in (?)', user.id).order('start_date DESC')
       end
+
     end
     if request.format == 'json'
       if user_access_token.present?
@@ -190,6 +189,30 @@ class EventsController < ApplicationController
       end
     end
 
+  end
+
+  def get_all_events
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    if user_access_token.present?
+      user = User.find_by_id(user_access_token.user_id)
+      if !params[:event_ids].blank?
+        all_my_events = Event.where('id in (?)', params[:event_ids].split(', '))
+      else
+        all_my_events = Event.find_all_by_owner_id(user.id)
+        invitations =Invitation.find_all_by_participant_id(user.id)
+        all_my_events << Event.where('id in(?)', invitations.collect{|invitation| invitation.event_id})
+        all_my_events.flatten!
+        all_my_events.uniq!
+      end
+      all_my_events.sort! { |a, b|  b.start_date <=> a.start_date}
+    end
+    if request.format == 'json'
+      if user_access_token.present?
+        render :json => {:events => all_my_events}
+      else
+        render :json => {:status => "Invalid Authentication you are not allow to do this action"}
+      end
+    end
   end
 
   def post_location

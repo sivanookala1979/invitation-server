@@ -128,4 +128,22 @@ class GroupsController < ApplicationController
     end
 
   end
+
+  def create_group_by_invites
+    event = Event.find_by_id(params[:event_id])
+    invitations = Invitation.find_all_by_event_id(event.id)
+    mobile_numbers = ''
+    invitations.each do |invitation|
+      mobile_numbers+=invitation.participant_mobile_number+","
+    end
+    group = Group.new
+    group.owner_id=event.owner_id
+    group.group_name = params[:name]
+    group.contact_numbers=mobile_numbers[0, mobile_numbers.length-1]
+    group.save
+
+    if request.format == 'json'
+      render :json => {:status => "Group Was successfully created with the name #{params[:name]}"}
+    end
+  end
 end

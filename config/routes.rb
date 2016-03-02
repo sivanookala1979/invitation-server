@@ -3,6 +3,7 @@ InvtappServer::Application.routes.draw do
     get :create_group, :on => :collection
     get :get_my_groups, :on => :collection
     get :differentiate_contacts, :on => :collection
+    get :create_group_by_invites, :on => :collection
   end
 
   resources :events do
@@ -19,6 +20,7 @@ InvtappServer::Application.routes.draw do
     get :get_distance_from_event, :on => :collection
     get :invitee_check_in_Status, :on => :collection
     get :delete_event, :on => :collection
+    get :get_all_events, :on => :collection
   end
 
   resources :users do
