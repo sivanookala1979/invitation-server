@@ -59,6 +59,7 @@ class UsersController < ApplicationController
     status=''
     if !user.blank?
       status="User already existed"
+      user.update_attribute("is_app_login",true)
     else
       user=User.new
       user.user_name = params[:user_name]

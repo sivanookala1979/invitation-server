@@ -126,6 +126,13 @@ class EventsController < ApplicationController
             user.user_name = group_number
             user.phone_number = group_number
             user.save
+            user_access_token = UserAccessTokens.find_by_user_id(user.id)
+            if user_access_token.blank?
+              user_access_token = UserAccessTokens.new
+              user_access_token.user_id = user.id
+              user_access_token.access_token = UUIDTools::UUID.random_create.to_s.delete '-' + 'user_access_token'
+              user_access_token.save
+            end
             invitation = Invitation.new
             invitation.participant_id = user.id
             invitation.participant_mobile_number = group_number
@@ -152,6 +159,13 @@ class EventsController < ApplicationController
         user.user_name = participant_mobile_number
         user.phone_number = participant_mobile_number
         user.save
+        user_access_token = UserAccessTokens.find_by_user_id(user.id)
+        if user_access_token.blank?
+          user_access_token = UserAccessTokens.new
+          user_access_token.user_id = user.id
+          user_access_token.access_token = UUIDTools::UUID.random_create.to_s.delete '-' + 'user_access_token'
+          user_access_token.save
+        end
         invitation = Invitation.new
         invitation.participant_id = user.id
         invitation.participant_mobile_number=participant_mobile_number

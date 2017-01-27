@@ -117,7 +117,7 @@ class GroupsController < ApplicationController
     mobile_numbers.each do |mobile_number|
       puts mobile_number
       user = User.find_by_phone_number(mobile_number)
-      if user.present?
+      if user.present? && user.is_app_login.eql?(true)
         invitation_app_contacts << mobile_number
       else
         sms_contacts << mobile_number
