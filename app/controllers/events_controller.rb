@@ -122,7 +122,12 @@ class EventsController < ApplicationController
               invitation.participant_mobile_number = participant.phone_number
             end
           else
+            user = User.new
+            user.user_name = group_number
+            user.mobile_number = group_number
+            user.save
             invitation = Invitation.new
+            invitation.participant_id = user.id
             invitation.participant_mobile_number = group_number
           end
           event_invitation.invitees_count = 0 if event_invitation.invitees_count.blank?
@@ -143,7 +148,12 @@ class EventsController < ApplicationController
           invitation.participant_mobile_number=participant_mobile_number
         end
       else
+        user = User.new
+        user.user_name = participant_mobile_number
+        user.mobile_number = participant_mobile_number
+        user.save
         invitation = Invitation.new
+        invitation.participant_id = user.id
         invitation.participant_mobile_number=participant_mobile_number
       end
       invitation.event_id = event_invitation.id
