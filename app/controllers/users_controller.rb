@@ -64,6 +64,7 @@ class UsersController < ApplicationController
       user=User.new
       user.user_name = params[:user_name]
       user.phone_number = params[:phone_number]
+      users.is_app_login = true
       status="Success"
       user.save
       user_access_token = UserAccessTokens.find_by_user_id(user.id)
