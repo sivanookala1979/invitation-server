@@ -124,7 +124,7 @@ class EventsController < ApplicationController
           else
             user = User.new
             user.user_name = group_number
-            user.mobile_number = group_number
+            user.phone_number = group_number
             user.save
             invitation = Invitation.new
             invitation.participant_id = user.id
@@ -150,7 +150,7 @@ class EventsController < ApplicationController
       else
         user = User.new
         user.user_name = participant_mobile_number
-        user.mobile_number = participant_mobile_number
+        user.phone_number = participant_mobile_number
         user.save
         invitation = Invitation.new
         invitation.participant_id = user.id
