@@ -286,7 +286,7 @@ class EventsController < ApplicationController
     invitation_details.save
     if request.format == 'json'
       if invitation_details.is_accepted
-        render :json => {:status => "Invitation Accepterd"}
+        render :json => {:status => "Invitation Accepterd",:accepted_count => event_invitation.accepted_count}
       else
         render :json => {:status => "Invitation Rejected"}
       end
