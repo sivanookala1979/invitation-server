@@ -204,7 +204,7 @@ class EventsController < ApplicationController
         events.each do |event|
           invitation = Invitation.find_by_event_id_and_participant_id(event.id, user.id)
           is_accepted = invitation.present? && invitation.is_accepted.present? ? invitation.is_accepted : false
-          all_my_events << EventDetails.new(event.event_name, event.end_date, event.description, event.latitude, event.longitude, event.address, event.private, event.remainder, event.status, event.owner_id, event.start_date, event.invitees_count, event.accepted_count, event.rejected_count, event.is_manual_check_in, event.check_in_count, event.is_recurring_event, event.recurring_type, event.event_theme, is_accepted)
+          all_my_events << EventDetails.new(event.id.to_i,event.event_name, event.end_date, event.description, event.latitude, event.longitude, event.address, event.private, event.remainder, event.status, event.owner_id, event.start_date, event.invitees_count, event.accepted_count, event.rejected_count, event.is_manual_check_in, event.check_in_count, event.is_recurring_event, event.recurring_type, event.event_theme, is_accepted)
         end
       else
         events = Event.where('owner_id in (?)', user.id).order('start_date DESC')
@@ -212,7 +212,7 @@ class EventsController < ApplicationController
         events.each do |event|
           invitation = Invitation.find_by_event_id_and_participant_id(event.id, user.id)
           is_accepted = invitation.present? && invitation.is_accepted.present? ? invitation.is_accepted : false
-          all_my_events << EventDetails.new(event.event_name, event.end_date, event.description, event.latitude, event.longitude, event.address, event.private, event.remainder, event.status, event.owner_id, event.start_date, event.invitees_count, event.accepted_count, event.rejected_count, event.is_manual_check_in, event.check_in_count, event.is_recurring_event, event.recurring_type, event.event_theme, is_accepted)
+          all_my_events << EventDetails.new(event.id.to_i,event.event_name, event.end_date, event.description, event.latitude, event.longitude, event.address, event.private, event.remainder, event.status, event.owner_id, event.start_date, event.invitees_count, event.accepted_count, event.rejected_count, event.is_manual_check_in, event.check_in_count, event.is_recurring_event, event.recurring_type, event.event_theme, is_accepted)
         end
       end
     end
