@@ -220,9 +220,9 @@ class EventsController < ApplicationController
     if user_access_token.present?
       user = User.find_by_id(user_access_token.user_id)
       if !params[:event_ids].blank?
-        all_my_events = Event.where('id in (?)', params[:event_ids].split(', '))
+        all_my_events = Event.where('id in (?) and hide =?', params[:event_ids].split(', '),false)
       else
-        all_my_events = Event.find_all_by_owner_id(user.id)
+        all_my_events = Event.find_all_by_owner_id_and_hide(user.id,false)
         invitations =Invitation.find_all_by_participant_id(user.id)
         all_my_events << Event.where('id in(?)', invitations.collect{|invitation| invitation.event_id})
         all_my_events.flatten!
