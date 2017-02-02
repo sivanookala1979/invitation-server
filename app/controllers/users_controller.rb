@@ -57,14 +57,21 @@ class UsersController < ApplicationController
   def create_user
     user = User.find_by_phone_number(params[:phone_number])
     status=''
-    if !user.blank?
+    if user.present?
       status="User already existed"
-      user.update_attribute("is_app_login",true)
+      user.update_attribute("is_app_login", true)
+      user_access_token = UserAccessTokens.find_by_user_id(user.id)
+      if user_access_token.blank?
+        user_access_token = UserAccessTokens.new
+        user_access_token.user_id = user.id
+        user_access_token.access_token = UUIDTools::UUID.random_create.to_s.delete '-' + 'user_access_token'
+        user_access_token.save
+      end
     else
       user=User.new
       user.user_name = params[:user_name]
       user.phone_number = params[:phone_number]
-      users.is_app_login = true
+      user.is_app_login = true
       status="Success"
       user.save
       user_access_token = UserAccessTokens.find_by_user_id(user.id)
