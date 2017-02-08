@@ -5,9 +5,9 @@ module EventsHelper
   end
 
   class EventDetails
-    attr_accessor :id, :event_name, :end_date, :description, :latitude, :longitude, :address, :private, :remainder, :status, :owner_id, :start_date, :invitees_count, :accepted_count, :rejected_count, :is_manual_check_in, :check_in_count, :is_recurring_event, :recurring_type, :event_theme, :is_accepted
+    attr_accessor :id, :event_name, :end_date, :description, :latitude, :longitude, :address, :private, :remainder, :status, :owner_id, :start_date, :invitees_count, :accepted_count, :rejected_count, :is_manual_check_in, :check_in_count, :is_recurring_event, :recurring_type, :event_theme, :is_accepted, :is_admin
 
-    def initialize(id, event_name, end_date, description, latitude, longitude, address, private, remainder, status, owner_id, start_date, invitees_count, accepted_count, rejected_count, is_manual_check_in, check_in_count, is_recurring_event, recurring_type, event_theme, is_accepted)
+    def initialize(id, event_name, end_date, description, latitude, longitude, address, private, remainder, status, owner_id, start_date, invitees_count, accepted_count, rejected_count, is_manual_check_in, check_in_count, is_recurring_event, recurring_type, event_theme, is_accepted, is_admin)
       @id = id
       @event_name = event_name
       @end_date = end_date
@@ -29,6 +29,7 @@ module EventsHelper
       @recurring_type =recurring_type
       @event_theme = event_theme
       @is_accepted = is_accepted
+      @is_admin = is_admin
     end
   end
 
