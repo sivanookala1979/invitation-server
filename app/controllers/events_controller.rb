@@ -86,7 +86,7 @@ class EventsController < ApplicationController
       new_event.save
       event_admins = EventAdmins.new
       event_admins.event_id = new_event.id
-      event_admins.user_id = event.owner_id
+      event_admins.user_id = new_event.owner_id
       event_admins.save
       if request.format == 'json'
         render :json => {:id => new_event.id, :status => params[:event_id].present? ? new_event.status : 'Successfully Updated.'}
