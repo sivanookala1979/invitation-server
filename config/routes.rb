@@ -22,7 +22,7 @@ InvtappServer::Application.routes.draw do
     get :invitee_check_in_Status, :on => :collection
     get :delete_event, :on => :collection
     get :get_all_events, :on => :collection
-    get :invitee_locations, :on => :collection
+    get :invitees_locations, :on => :collection
     get :invitees_distances, :on => :collection
   end
 

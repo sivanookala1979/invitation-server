@@ -536,7 +536,7 @@ class EventsController < ApplicationController
 
   def invitees_locations
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
-    @user = User.find_by_id(4)
+    @user = User.find_by_id(49)
     @event = Event.find_by_id(params[:event_id])
     if @user.present? && @event.present?
       @event_admin = EventAdmins.find_by_user_id_and_event_id(user.id, @event.id)
@@ -573,7 +573,7 @@ class EventsController < ApplicationController
 
   def invitees_distances
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
-    @user = User.find_by_id(4)
+    @user = User.find_by_id(49)
     @event = Event.find_by_id(params[:event_id])
     if @user.present? && @event.present?
       @event_admin = EventAdmins.find_by_user_id_and_event_id(user.id, @event.id)
