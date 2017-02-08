@@ -1,26 +1,31 @@
-<div class ="wrapper">
+<div class="wrapper">
   <%= get_index_text("Listing Event Invitations") %>
-<div class="row">
-  <div class="col-sm-12">
-    <table class="table table-bordered">
-      <tr class="table_style">
-        <th>Participant Name</th>
-        <th>Mobile Number</th>
-        <th>Is Accepted</th>
-        <th></th>
-      </tr>
+  <div class="row">
+    <div class="col-sm-12">
+      <table class="table table-bordered">
+        <tr class="table_style">
+          <th>Participant Name</th>
+          <th>Mobile Number</th>
+          <th>Is Accepted</th>
+          <th>Is Distance Provide</th>
+          <th>Is Distance Provide</th>
+          <th>Is Distance Provide</th>
+          <th>Is Location Share</th>
+          <th>Is Not Share</th>
+        </tr>
 
-      <% @event_invitation.each do |event_invitation| %>
-          <tr>
-            <%participant = User.find_by_id(event_invitation.participant_id) %>
-            <td><%= participant.user_name %></td>
-            <td><%= participant.phone_number %></td>
-            <td><%= event_invitation.is_accepted %></td>
-            <td><a href="/events/user_locations?participant_id=<%= participant.id %>">User Location</a></td>
-
-      <% end %>
-
-    </table>
-      </div>
+        <% @event_invitation.each do |event_invitation| %>
+            <tr>
+              <% participant = User.find_by_id(event_invitation.participant_id) %>
+              <td><%= participant.user_name %></td>
+              <td><%= participant.phone_number %></td>
+              <td><%= event_invitation.is_accepted %></td>
+              <td><%= event_invitation.is_distance_provide %></td>
+              <td><%= event_invitation.is_location_provide %></td>
+              <td><%= event_invitation.is_not_share %></td>
+              <td><a href="/events/user_locations?participant_id=<%= participant.id %>">User Location</a></td>
+        <% end %>
+      </table>
     </div>
-    </div>
+  </div>
+</div>
