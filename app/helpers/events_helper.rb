@@ -31,4 +31,30 @@ module EventsHelper
       @is_accepted = is_accepted
     end
   end
+
+
+  class LocationInformation
+    attr_accessor :user_name, :mobile_number, :latitude, :longitude, :distance, :time
+
+    def initialize(user_name, mobile_number, latitude, longitude, distance, time)
+      @user_name = user_name
+      @mobile_number = mobile_number
+      @latitude = latitude
+      @longitude = longitude
+      @distance = distance
+      @time = time
+    end
+  end
+
+  class DistanceInformation
+    attr_accessor :user_name, :mobile_number, :distance, :time
+
+    def initialize(user_name, mobile_number, distance, time)
+      @user_name = user_name
+      @mobile_number = mobile_number
+      @distance = distance
+      @time = time
+    end
+  end
+
 end

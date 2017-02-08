@@ -532,4 +532,80 @@ class EventsController < ApplicationController
       render :json => {:status => 'Success', :total_invites => @event.invitees_count}
     end
   end
+
+
+  def invitees_locations
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    @user = User.find_by_id(4)
+    @event = Event.find_by_id(params[:event_id])
+    if @user.present? && @event.present?
+      @event_admin = EventAdmins.find_by_user_id_and_event_id(user.id, @event.id)
+      if @event_admin.present?
+        @invitations = Invitation.find_all_by_event_id(@event.id)
+      else
+        @invitations = Invitation.find_all_by_event_id_and_is_location_provide(@event.id, true)
+      end
+
+      all_user_ids = []
+      @invitations.each do |invitation|
+        all_user_ids << invitation.participant_id
+      end
+      location_information = []
+      all_user_ids.each do |user_id|
+        @user_location = UserLocation.find_all_by_user_id(user_id).last
+        if @event.longitude.present?&&@event.latitude.present?&&@user_location.longitude.present?&&@user_location.latitude.present?
+          distance= getDistanceFromLatLonInKm(@event.latitude, @event.longitude, @user_location.latitude, @user_location.longitude)
+        else
+          distance = "not available"
+        end
+        location_information << LocationInformation.new(@user.user_name, @user.phone_number, @user_location.latitude, @user_location.longitude, distance, @user_location.time)
+      end
+    end
+    if request.format == 'json'
+      if @user.present? && @event.present?
+        render :json => {:location_information => location_information}
+      else
+        render :json => {:status => "Invalid Authentication you are not allow to do this action"}
+      end
+    end
+  end
+
+
+  def invitees_distances
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    @user = User.find_by_id(4)
+    @event = Event.find_by_id(params[:event_id])
+    if @user.present? && @event.present?
+      @event_admin = EventAdmins.find_by_user_id_and_event_id(user.id, @event.id)
+      if @event_admin.present?
+        @invitations = Invitation.find_all_by_event_id(@event.id)
+      else
+        @invitations = Invitation.find_all_by_event_id_and_is_location_provide(@event.id, true)
+      end
+
+      all_user_ids = []
+      @invitations.each do |invitation|
+        all_user_ids << invitation.participant_id
+      end
+      distance_information = []
+      all_user_ids.each do |user_id|
+        @user_location = UserLocation.find_all_by_user_id(user_id).last
+        if @event.longitude.present?&&@event.latitude.present?&&@user_location.longitude.present?&&@user_location.latitude.present?
+          distance= getDistanceFromLatLonInKm(@event.latitude, @event.longitude, @user_location.latitude, @user_location.longitude)
+        else
+          distance = "not available"
+        end
+        distance_information << DistanceInformation.new(@user.user_name, @user.phone_number, distance, @user_location.time)
+      end
+    end
+    if request.format == 'json'
+      if @user.present? && params[:event_id].present?
+        render :json => {:distance_information => distance_information}
+      else
+        render :json => {:status => "Invalid Authentication you are not allow to do this action"}
+      end
+    end
+  end
+
+
 end
