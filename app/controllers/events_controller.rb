@@ -57,7 +57,7 @@ class EventsController < ApplicationController
 
   def create_event
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
-    if !user_access_token.blank?
+    if user_access_token.present?
       user = User.find_by_id(user_access_token.user_id)
       event = params[:event]
       new_event =Event.find_by_id(params[:event_id]) if params[:event_id].present?
