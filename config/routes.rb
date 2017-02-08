@@ -9,6 +9,7 @@ InvtappServer::Application.routes.draw do
   resources :events do
     post :create_event, :on => :collection
     post :create_invitations, :on => :collection
+    post :create_new_invitations, :on => :collection
     get :get_my_invitations, :on => :collection
     get :get_my_events, :on => :collection
     post :post_location, :on => :collection
