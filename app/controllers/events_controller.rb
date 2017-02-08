@@ -539,7 +539,7 @@ class EventsController < ApplicationController
     @user = User.find_by_id(49)
     @event = Event.find_by_id(params[:event_id])
     if @user.present? && @event.present?
-      @event_admin = EventAdmins.find_by_user_id_and_event_id(user.id, @event.id)
+      @event_admin = EventAdmins.find_by_user_id_and_event_id(@user.id, @event.id)
       if @event_admin.present?
         @invitations = Invitation.find_all_by_event_id(@event.id)
       else
@@ -576,7 +576,7 @@ class EventsController < ApplicationController
     @user = User.find_by_id(49)
     @event = Event.find_by_id(params[:event_id])
     if @user.present? && @event.present?
-      @event_admin = EventAdmins.find_by_user_id_and_event_id(user.id, @event.id)
+      @event_admin = EventAdmins.find_by_user_id_and_event_id(@user.id, @event.id)
       if @event_admin.present?
         @invitations = Invitation.find_all_by_event_id(@event.id)
       else
