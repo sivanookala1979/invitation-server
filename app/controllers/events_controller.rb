@@ -498,8 +498,8 @@ class EventsController < ApplicationController
     if group_ids.present?
       group_ids.each do |group_id|
         @group = Group.find_by_id(group_id.to_i)
-        group_numbers = group.contact_numbers.split(',')
-
+        group_numbers = @group.contact_numbers.split(',')
+        if group_numbers.present?
         group_numbers.each do |number|
           @user = User.find_by_phone_number(number)
           if @user.blank?
@@ -528,6 +528,7 @@ class EventsController < ApplicationController
           @event.invitees_count = @event.invitees_count.to_i + 1
           @event.save
         end
+          end
       end
     end
     if request.format == 'json'
@@ -582,7 +583,7 @@ class EventsController < ApplicationController
       if @event_admin.present?
         @invitations = Invitation.find_all_by_event_id(@event.id)
       else
-        @invitations = Invitation.find_all_by_event_id_and_is_location_provide(@event.id, true)
+        @invitations = Invitation.find_all_by_event_id_and_is_distance_provide(@event.id, true)
       end
 
       all_user_ids = []
