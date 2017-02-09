@@ -63,12 +63,8 @@ class EventsController < ApplicationController
       new_event =Event.find_by_id(params[:event_id]) if params[:event_id].present?
       new_event=Event.new if new_event.blank?
       new_event.event_name = event[:event_name]
-      puts event[:start_date]
       new_event.start_date = Time.parse(event[:start_date]).utc.in_time_zone('Kolkata')
-      puts new_event.start_date
-      puts event[:end_date]
       new_event.end_date = Time.parse(event[:end_date]).utc.in_time_zone('Kolkata')
-      puts new_event.end_date
       new_event.description = event[:description]
       new_event.latitude = event[:latitude]
       new_event.longitude = event[:longitude]
@@ -84,11 +80,16 @@ class EventsController < ApplicationController
       new_event.status= "Created" if params[:event_id].blank?
       new_event.owner_id = user.id
       new_event.save
-      event_admins = EventAdmins.new
-      event_admins.event_id = new_event.id
-      event_admins.user_id = new_event.owner_id
-      event_admins.save
-      if request.format == 'json'
+      event_admin = EventAdmins.find_by_user_id_and_event_id(new_event.owner_id, new_event.id)
+      if event_admin.blank?
+        event_admins = EventAdmins.new
+        event_admins.event_id = new_event.id
+        event_admins.user_id = new_event.owner_id
+        event_admins.save
+      end
+    end
+    if request.format == 'json'
+      if user_access_token.present?
         render :json => {:id => new_event.id, :status => params[:event_id].present? ? new_event.status : 'Successfully Updated.'}
       else
         render :json => {:status => "Invalid Authentication you are not allow to do this action"}
