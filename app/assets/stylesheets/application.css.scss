@@ -7,10 +7,10 @@
 
 */
 @import "bootstrap";
-.wrapper {
-    text-align: left;
-    margin: 0 auto;
-    width: 69em;
+.wrapper{
+  width: 100%;
+  max-width: 1300px;
+  margin: 0 auto;
 }
 
 .home_main_icons_style {

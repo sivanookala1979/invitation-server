@@ -1,0 +1,24 @@
+<%= get_index_text("Group Members") %>
+<table class="table table-bordered ">
+  <tr class="table_style">
+    <th>Id</th>
+    <th>Group Id</th>
+    <th> User Id</th>
+    <th>User Name</th>
+    <th>Phone NUmber</th>
+    <th>Is group Admin</th>
+    <th>Group Members</th>
+  </tr>
+
+  <% @group_members.each do |group_member| %>
+      <tr>
+        <td><%= group_member.id %></td>
+        <td><%= group_member.group_id %></td>
+        <td><%= group_member.user_id %></td>
+        <td><%= group_member.user_name %></td>
+        <td><%= group_member.user_mobile_number %></td>
+        <td><%= group_member.is_group_admin %></td>
+      </tr>
+  <% end %>
+</table>
+

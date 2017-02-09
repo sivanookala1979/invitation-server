@@ -4,6 +4,8 @@ InvtappServer::Application.routes.draw do
     get :get_my_groups, :on => :collection
     get :differentiate_contacts, :on => :collection
     get :create_group_by_invites, :on => :collection
+    get :group_members_list,:on => :collection
+    get :event_admins,:on => :collection
   end
 
   resources :events do

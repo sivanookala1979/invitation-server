@@ -12,18 +12,17 @@
   <%= csrf_meta_tags %>
 </head>
 <body>
-<div class="row" style="background-color:#489ED5;padding: 20px 40px;">
+<div style="background-color:#0575AF;padding: 25px 40px;">
+  <div class="row wrapper">
+    <div class="col-sm-4" style="font-size: 26px;color: #ffffff">Invitation App</div>
+    <div class="col-sm-8 text-right"><a href='/users' class="home_main_icons_style">Users</a>
+      <a href='/events' class="home_main_icons_style">Events</a>
+      <a href='/groups' class="home_main_icons_style">Groups</a>
+    </div>
+  </div>
 
-  <div class="col-sm-4" style="font-size: 24px;color: #ffffff;font-weight: bolder;">Invitation
-    App Server
-  </div>
-  <div class="col-sm-8" align="right">
-    <a href='/users' class="home_main_icons_style">Users
-    </a>
-    <a href='/events' class="home_main_icons_style">Events</a>
-  </div>
 </div>
-<div id="main-container" style="margin-top: 30px">
+<div style="margin-top: 30px" class="wrapper">
   <%= yield %>
 </div>
 <script>

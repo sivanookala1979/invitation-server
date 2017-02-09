@@ -1,0 +1,15 @@
+<%= get_index_text("Event Admins") %>
+<table class="table table-bordered ">
+  <tr class="table_style">
+    <th>Event Id</th>
+    <th>User Id</th>
+  </tr>
+
+  <% @event_admins.each do |event_admin| %>
+      <tr>
+        <td><%= event_admin.event_id %></td>
+        <td><%= User.find_by_id(event_admin.user_id).try(:user_name) %></td>
+      </tr>
+  <% end %>
+</table>
+

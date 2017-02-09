@@ -221,5 +221,13 @@ class GroupsController < ApplicationController
     end
   end
 
+  def group_members_list
+    @group_members = GroupMembers.find_all_by_group_id(params[:group_id])
+  end
+
+  def event_admins
+    @event_admins = EventAdmins.all.reverse
+  end
+
 
 end

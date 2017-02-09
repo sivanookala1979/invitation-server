@@ -1,5 +1,4 @@
-<div class ="wrapper">
-  <%= get_index_text("Listing Users") %>
+<%= get_index_text("Listing Users") %>
 <div class="row">
   <div class="col-sm-12">
     <table class="table table-bordered">
@@ -11,19 +10,16 @@
         <th></th>
       </tr>
 
-<% @users.each do |user| %>
-  <tr>
-    <td><%= user.user_name %></td>
-    <td><%= user.phone_number %></td>
-    <td><%= link_to 'Show', user %></td>
-    <td><%= link_to 'Edit', edit_user_path(user) %></td>
-    <td><%= link_to 'Destroy', user, confirm: 'Are you sure?', method: :delete %></td>
-  </tr>
-<% end %>
-</table>
-
-<br />
-
+      <% @users.each do |user| %>
+          <tr>
+            <td><%= user.user_name %></td>
+            <td><%= user.phone_number %></td>
+            <td><%= link_to 'Show', user %></td>
+            <td><%= link_to 'Edit', edit_user_path(user) %></td>
+            <td><%= link_to 'Destroy', user, confirm: 'Are you sure?', method: :delete %></td>
+          </tr>
+      <% end %>
+    </table>
   </div>
 </div>
-    </div>
+
