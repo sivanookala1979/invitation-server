@@ -482,7 +482,7 @@ class EventsController < ApplicationController
             invitation.participant_mobile_number = participant_mobile['mobile_number']
             invitation.save
           end
-          if participant_mobile["event_admin"].present? && participant_mobile["event_admin"].eql?("true")
+          if participant_mobile["event_admin"].present? && participant_mobile["event_admin"].eql?(true)
             event_admins = EventAdmins.find_by_event_id_and_user_id(@event.id, @user.id)
             if event_admins.blank?
               event_admin = EventAdmins.new
