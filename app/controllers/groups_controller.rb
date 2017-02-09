@@ -1,6 +1,7 @@
 class GroupsController < ApplicationController
   # GET /groups
   # GET /groups.json
+  include ApplicationHelper
   def index
     @groups = Group.all
 
@@ -65,6 +66,19 @@ class GroupsController < ApplicationController
         contact_numbers = params[:contact_numbers].split(',')
         contact_numbers.each do |number|
           user = User.find_by_phone_number(number)
+          if user.blank?
+            user = User.new
+            user.user_name = number
+            user.phone_number = number
+            user.save
+            user_access_token = UserAccessTokens.find_by_user_id(user.id)
+            if user_access_token.blank?
+              user_access_token = UserAccessTokens.new
+              user_access_token.user_id = user.id
+              user_access_token.access_token = UUIDTools::UUID.random_create.to_s.delete '-' + 'user_access_token'
+              user_access_token.save
+            end
+          end
           group_member = GroupMembers.new
           group_member.group_id = group.id
           group_member.user_id = user.id
