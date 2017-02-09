@@ -454,57 +454,16 @@ class EventsController < ApplicationController
 
   def create_new_invitations
     @event = Event.find_by_id(params[:event_id])
-    participant_mobile_numbers = params[:participant_mobile_numbers]
-    group_ids =params[:group_ids].to_a
-    if participant_mobile_numbers.present?
-      participant_mobile_numbers.each do |participant_mobile|
-        @user = User.find_by_phone_number(participant_mobile['mobile_number'])
-        if @user.blank?
-          @user = User.new
-          @user.user_name = participant_mobile['mobile_number']
-          @user.phone_number = participant_mobile['mobile_number']
-          @user.save
-          user_access_token = UserAccessTokens.find_by_user_id(@user.id)
-          if user_access_token.blank?
-            user_access_token = UserAccessTokens.new
-            user_access_token.user_id = @user.id
-            user_access_token.access_token = UUIDTools::UUID.random_create.to_s.delete '-' + 'user_access_token'
-            user_access_token.save
-          end
-        end
-        invitation = Invitation.find_by_participant_id_and_event_id(@user.id, @event.id)
-        if invitation.blank?
-          invitation = Invitation.new
-          invitation.participant_id = @user.id
-          invitation.event_id = @event.id
-          invitation.participant_mobile_number = participant_mobile['mobile_number']
-          invitation.save
-        end
-        if participant_mobile["event_admin"].present? && participant_mobile["event_admin"].eql?("true")
-          event_admins = EventAdmins.find_by_event_id_and_user_id(@event.id, @user.id)
-          if event_admins.present?
-            event_admin = EventAdmins.new
-            event_admin.user_id = @user.id
-            event_admin.event_id = @event.id
-            event_admin.save
-          end
-        end
-        @event.invitees_count = 0 if @event.invitees_count.blank?
-        @event.invitees_count = @event.invitees_count.to_i + 1
-        @event.save
-      end
-    end
-    if group_ids.present?
-      group_ids.each do |group_id|
-        @group = Group.find_by_id(group_id.to_i)
-        group_numbers = @group.contact_numbers.split(',')
-        if group_numbers.present?
-        group_numbers.each do |number|
-          @user = User.find_by_phone_number(number)
+    if @event.present?
+      participant_mobile_numbers = params[:participant_mobile_numbers]
+      group_ids =params[:group_ids].to_a
+      if participant_mobile_numbers.present?
+        participant_mobile_numbers.each do |participant_mobile|
+          @user = User.find_by_phone_number(participant_mobile['mobile_number'])
           if @user.blank?
             @user = User.new
-            @user.user_name = number
-            @user.phone_number = number
+            @user.user_name = participant_mobile['mobile_number']
+            @user.phone_number = participant_mobile['mobile_number']
             @user.save
             user_access_token = UserAccessTokens.find_by_user_id(@user.id)
             if user_access_token.blank?
@@ -522,15 +481,62 @@ class EventsController < ApplicationController
             invitation.participant_mobile_number = participant_mobile['mobile_number']
             invitation.save
           end
+          if participant_mobile["event_admin"].present? && participant_mobile["event_admin"].eql?("true")
+            event_admins = EventAdmins.find_by_event_id_and_user_id(@event.id, @user.id)
+            if event_admins.present?
+              event_admin = EventAdmins.new
+              event_admin.user_id = @user.id
+              event_admin.event_id = @event.id
+              event_admin.save
+            end
+          end
           @event.invitees_count = 0 if @event.invitees_count.blank?
           @event.invitees_count = @event.invitees_count.to_i + 1
           @event.save
         end
+      end
+      if group_ids.present?
+        group_ids.each do |group_id|
+          @group = Group.find_by_id(group_id.to_i)
+          group_numbers = GroupMembers.find_all_by_group_id(@group.id)
+          if group_numbers.present?
+            group_numbers.each do |number|
+              @user = User.find_by_id(number.user_id)
+              if @user.blank?
+                @user = User.new
+                @user.user_name = number.user_name
+                @user.phone_number = number.user_mobile_number
+                @user.save
+                user_access_token = UserAccessTokens.find_by_user_id(@user.id)
+                if user_access_token.blank?
+                  user_access_token = UserAccessTokens.new
+                  user_access_token.user_id = @user.id
+                  user_access_token.access_token = UUIDTools::UUID.random_create.to_s.delete '-' + 'user_access_token'
+                  user_access_token.save
+                end
+              end
+              invitation = Invitation.find_by_participant_id_and_event_id(@user.id, @event.id)
+              if invitation.blank?
+                invitation = Invitation.new
+                invitation.participant_id = @user.id
+                invitation.event_id = @event.id
+                invitation.participant_mobile_number = @user.phone_number
+                invitation.save
+              end
+              @event.invitees_count = 0 if @event.invitees_count.blank?
+              @event.invitees_count = @event.invitees_count.to_i + 1
+              @event.save
+            end
           end
+        end
       end
     end
     if request.format == 'json'
-      render :json => {:status => 'Success', :total_invites => @event.invitees_count}
+      if @event.present?
+        render :json => {:status => 'Success', :total_invites => @event.invitees_count}
+      else
+        render :json => {:status => 'There is no Event'}
+      end
     end
   end
 

@@ -52,38 +52,74 @@ class GroupsController < ApplicationController
       end
     end
   end
+
   def create_group
-    group = Group.new
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
-    if !user_access_token.blank?
-    user = User.find_by_id(user_access_token.user_id)
-    group.owner_id = user.id
-    group.group_name = params[:name]
-    group.contact_numbers = params[:contact_numbers]
-    group.save
-    if request.format == 'json'
-      render :json => {:id =>  group.id ,:status =>'Group successfully created'}
-    end
-    else
-      render :json => {:status =>'Invalid login details'}
+    @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
+    if @user.present?
+      group = Group.new
+      group.group_name = params[:name]
+      group.owner_id = @user.id
+      group.save
+      if group.present? && params[:contact_numbers].present?
+        contact_numbers = params[:contact_numbers].split(',')
+        contact_numbers.each do |number|
+          user = User.find_by_phone_number(number)
+          group_member = GroupMembers.new
+          group_member.group_id = group.id
+          group_member.user_id = user.id
+          group_member.user_name = user.user_name
+          group_member.user_mobile_number = user.phone_number
+          group_member.is_group_admin = false
+          group_member.save
+        end
       end
+      admin_group_member = GroupMembers.find_by_user_id_and_group_id(@user.id, group.id) if group.present?
+      if admin_group_member.blank?
+        group_member = GroupMembers.new
+        group_member.group_id = group.id
+        group_member.user_id = @user.id
+        group_member.user_name = @user.user_name
+        group_member.user_mobile_number = @user.phone_number
+        group_member.is_group_admin = true
+        group_member.save
+      end
+    end
+    respond_to do |format|
+      if @user.present? && group.present?
+        format.json { render :json => {:group_id => group.id, :status => 'Group successfully created'} }
+      else
+        format.json { render :json => {:error_message => 'Invalid Authentication you are not allow to do this action'} }
+      end
+    end
   end
 
-   def get_my_groups
-     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
-     if user_access_token.present?
-       user = User.find_by_id(user_access_token.user_id)
-      all_groups = Group.find_all_by_owner_id(user.id)
-     if request.format == 'json'
-         render :json => {:groups => all_groups}
-       else
-         render :json => {:status => "Invalid Authentication you are not allow to do this action"}
-       end
-     end
-   end
+  def get_my_groups
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
+    if @user.present?
+      group_ids = []
+      group_members = GroupMembers.find_all_by_user_id(@user.id)
+      group_members.each do |group_member|
+        group_ids << group_member.group_id
+      end
+      group_information = []
+      group_ids.each do |group_id|
+        @groups = Group.find_by_id(group_id)
+        @group_members = GroupMembers.find_all_by_group_id(group_id)
+        @user = User.find_by_id(@group.owner_id)
+        group_information << GroupInformation.new(@group.group_name, @user.user_name, @group.owner_id, @group.created_at, @group_members)
+      end
+    end
+    if request.format == 'json'
+      if @user.present?
+        render :json => {:groups => group_information}
+      else
+        render :json => {:error_message => 'Invalid login details'}
+      end
+    end
+  end
 
-  # PUT /groups/1
-  # PUT /groups/1.json
   def update
     @group = Group.find(params[:id])
 
@@ -131,19 +167,45 @@ class GroupsController < ApplicationController
 
   def create_group_by_invites
     event = Event.find_by_id(params[:event_id])
-    invitations = Invitation.find_all_by_event_id(event.id)
-    mobile_numbers = ''
-    invitations.each do |invitation|
-      mobile_numbers+=invitation.participant_mobile_number+","
+    if event.present?
+      group = Group.new
+      group.owner_id=event.owner_id
+      group.group_name = params[:name]
+      group.contact_numbers=" "
+      group.save
+      invitations = Invitation.find_all_by_event_id(event.id)
+      if group.present? && invitations.present?
+        invitations.each do |invitation|
+          user = User.find_by_id(invitation.participant_id)
+          group_member = GroupMembers.new
+          group_member.group_id = group.id
+          group_member.user_id = user.id
+          group_member.user_name = user.user_name
+          group_member.user_mobile_number = user.phone_number
+          group_member.is_group_admin = false
+          group_member.save
+        end
+      end
+      admin_group_member = GroupMembers.find_by_user_id_and_group_id(event.owner_id, group.id)
+      if admin_group_member.blank?
+        @user = User.find_by_id(event.owner_id)
+        group_member = GroupMembers.new
+        group_member.group_id = group.id
+        group_member.user_id = @user.id
+        group_member.user_name = @user.user_name
+        group_member.user_mobile_number = @user.phone_number
+        group_member.is_group_admin = true
+        group_member.save
+      end
     end
-    group = Group.new
-    group.owner_id=event.owner_id
-    group.group_name = params[:name]
-    group.contact_numbers=mobile_numbers[0, mobile_numbers.length-1]
-    group.save
-
-    if request.format == 'json'
-      render :json => {:status => "Group Was successfully created with the name #{params[:name]}"}
+    respond_to do |format|
+      if event.present? && group.present?
+        format.json { render :json => {:group_id => group.id, :status => 'Group successfully created'} }
+      else
+        format.json { render :json => {:error_message => 'There is no Event'} }
+      end
     end
   end
+
+
 end
