@@ -461,9 +461,8 @@ class EventsController < ApplicationController
         @user = User.find_by_phone_number(participant_mobile['mobile_number'])
         if @user.blank?
           @user = User.new
-          @user = User.new
-          @user.user_name = group_number
-          @user.phone_number = group_number
+          @user.user_name = participant_mobile['mobile_number']
+          @user.phone_number = participant_mobile['mobile_number']
           @user.save
           user_access_token = UserAccessTokens.find_by_user_id(@user.id)
           if user_access_token.blank?
@@ -504,9 +503,8 @@ class EventsController < ApplicationController
           @user = User.find_by_phone_number(number)
           if @user.blank?
             @user = User.new
-            @user = User.new
-            @user.user_name = group_number
-            @user.phone_number = group_number
+            @user.user_name = number
+            @user.phone_number = number
             @user.save
             user_access_token = UserAccessTokens.find_by_user_id(@user.id)
             if user_access_token.blank?
