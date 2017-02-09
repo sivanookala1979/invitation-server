@@ -484,7 +484,7 @@ class EventsController < ApplicationController
           end
           if participant_mobile["event_admin"].present? && participant_mobile["event_admin"].eql?("true")
             event_admins = EventAdmins.find_by_event_id_and_user_id(@event.id, @user.id)
-            if event_admins.present?
+            if event_admins.blank?
               event_admin = EventAdmins.new
               event_admin.user_id = @user.id
               event_admin.event_id = @event.id
