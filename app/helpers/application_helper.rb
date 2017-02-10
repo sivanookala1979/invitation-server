@@ -29,6 +29,11 @@ module ApplicationHelper
     return deg * (Math::PI/180)
   end
 
+  def self.get_otp
+    word = [('1'..'9')].map { |i| i.to_a }.flatten
+    (0...6).map { word[rand(word.length)] }.join
+  end
+
   def distance_of_time_in_words(from_time, to_time = 0, options = {})
     options = {
         scope: :'datetime.distance_in_words'

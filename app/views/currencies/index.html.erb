@@ -1,0 +1,39 @@
+<h1>Listing currencies</h1>
+
+<table>
+  <tr>
+    <th>Title</th>
+    <th>Description</th>
+    <th>Active</th>
+    <th>Currency symbol</th>
+    <th>Country code</th>
+    <th>Mobile number count</th>
+    <th>Sys country code</th>
+    <th>Country name</th>
+    <th>Remarks</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @currencies.each do |currency| %>
+  <tr>
+    <td><%= currency.title %></td>
+    <td><%= currency.description %></td>
+    <td><%= currency.active %></td>
+    <td><%= currency.currency_symbol %></td>
+    <td><%= currency.country_code %></td>
+    <td><%= currency.mobile_number_count %></td>
+    <td><%= currency.sys_country_code %></td>
+    <td><%= currency.country_name %></td>
+    <td><%= currency.remarks %></td>
+    <td><%= link_to 'Show', currency %></td>
+    <td><%= link_to 'Edit', edit_currency_path(currency) %></td>
+    <td><%= link_to 'Destroy', currency, confirm: 'Are you sure?', method: :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Currency', new_currency_path %>

@@ -1,0 +1,23 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  title: MyString
+  description: MyString
+  active: false
+  currency_symbol: MyString
+  country_code: MyString
+  mobile_number_count: 1
+  sys_country_code: MyString
+  country_name: MyString
+  remarks: MyText
+
+two:
+  title: MyString
+  description: MyString
+  active: false
+  currency_symbol: MyString
+  country_code: MyString
+  mobile_number_count: 1
+  sys_country_code: MyString
+  country_name: MyString
+  remarks: MyText

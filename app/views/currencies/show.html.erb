@@ -1,0 +1,50 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Title:</b>
+  <%= @currency.title %>
+</p>
+
+<p>
+  <b>Description:</b>
+  <%= @currency.description %>
+</p>
+
+<p>
+  <b>Active:</b>
+  <%= @currency.active %>
+</p>
+
+<p>
+  <b>Currency symbol:</b>
+  <%= @currency.currency_symbol %>
+</p>
+
+<p>
+  <b>Country code:</b>
+  <%= @currency.country_code %>
+</p>
+
+<p>
+  <b>Mobile number count:</b>
+  <%= @currency.mobile_number_count %>
+</p>
+
+<p>
+  <b>Sys country code:</b>
+  <%= @currency.sys_country_code %>
+</p>
+
+<p>
+  <b>Country name:</b>
+  <%= @currency.country_name %>
+</p>
+
+<p>
+  <b>Remarks:</b>
+  <%= @currency.remarks %>
+</p>
+
+
+<%= link_to 'Edit', edit_currency_path(@currency) %> |
+<%= link_to 'Back', currencies_path %>

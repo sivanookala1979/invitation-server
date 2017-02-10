@@ -1,4 +1,6 @@
 InvtappServer::Application.routes.draw do
+  resources :currencies
+
   resources :groups do
     get :create_group, :on => :collection
     get :get_my_groups, :on => :collection
@@ -31,6 +33,8 @@ InvtappServer::Application.routes.draw do
   resources :users do
     get :create_user, :on => :collection
     get :login, :on => :collection
+    get :log_in_with_mobile, :on => :collection
+    get :register_with_mobile, :on => :collection
     get :home_page, :on => :collection
   end
 
