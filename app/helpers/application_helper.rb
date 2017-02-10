@@ -102,4 +102,43 @@ module ApplicationHelper
       end
     end
   end
+
+
+
+  def self.upload_image(params_image)
+    image = Images.new
+    image.image_path = params_image
+    image.save
+    path = Rails.root.to_s+"/public"+image.image_path.url(:original).split('?')[0]
+    url = "cwebp -q 80 #{path} -o #{path.gsub('.jpg', '.webp').gsub('.png', '.webp')}"
+    puts url
+    system(url)
+    image
+  end
+
+  def save_image(decode_image)
+    image = Images.new
+    image.image_path =process_photo(decode_image)
+    image.save
+    url = "cwebp -q 80 #{Rails.root.to_s+"/public/assets/image/#{image.id}/original/picture.png"} -o #{Rails.root.to_s+"/public/assets/image/#{image.id}/original/picture.webp"}"
+    system(url)
+    image
+  end
+
+  def process_photo(photo)
+    data = nil
+    if !photo.blank?
+      data = StringIO.new(Base64.decode64(photo))
+      data.class.class_eval { attr_accessor :original_filename, :content_type }
+      data.original_filename = 'picture.png'
+      data.content_type = 'image/png'
+    end
+    data
+  end
+
+
+  def self.get_root_url
+    "http://invtapp.cerone-software.com/"
+  end
+
 end

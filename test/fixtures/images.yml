@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  image_path: MyString
+  image_path_file_name: MyString
+  image_path_content_type: MyString
+  image_path_file_size: 1
+  image_path_updated_at: 2017-02-10 12:12:55
+
+two:
+  image_path: MyString
+  image_path_file_name: MyString
+  image_path_content_type: MyString
+  image_path_file_size: 1
+  image_path_updated_at: 2017-02-10 12:12:55

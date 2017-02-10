@@ -36,6 +36,8 @@ InvtappServer::Application.routes.draw do
     get :log_in_with_mobile, :on => :collection
     get :register_with_mobile, :on => :collection
     get :home_page, :on => :collection
+    get :get_user_details, :on => :collection
+    get :update_user_details,:on => :collection
   end
 
 

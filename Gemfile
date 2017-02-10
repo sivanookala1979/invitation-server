@@ -7,6 +7,7 @@ gem 'rails', '3.1.12'
 
 gem 'sqlite3'
 gem 'bootstrap-datepicker-rails'
+gem 'paperclip'
 gem 'uuidtools'
 gem 'bootstrap-sass', '~> 3.2.0'
 

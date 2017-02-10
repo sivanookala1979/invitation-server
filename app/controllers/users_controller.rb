@@ -157,8 +157,36 @@ class UsersController < ApplicationController
     end
   end
 
-  # PUT /users/1
-  # PUT /users/1.json
+  def get_user_details
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    if user_access_token.present?
+      @user = User.find_by_id(user_access_token.user_id)
+      render :json => @user.as_json(:only => [:user_name, :phone_number, :is_app_login, :is_profile_given, :status])
+    else
+      render :json => {:error_message => "Invalid Authentication you are not allow to do this action"}
+    end
+  end
+
+  def update_user_details
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    if user_access_token.present?
+      @user = User.find_by_id(user_access_token.user_id)
+      @user.update_attribute(:user_name, params[:user_name]) if params[:user_name].present?
+      @user.update_attribute(:phone_number, params[:phone_number]) if params[:phone_number].present?
+      @user.update_attribute(:status, params[:status]) if params[:status].present?
+      @user.update_attribute(:is_profile_given, true)
+      if params[:image].present?
+        image = save_image(params[:image])
+        @user.update_attribute(:image_id, image.id) if image.present?
+      end
+    end
+    if user_access_token.present?
+      render :json => @user.as_json(:only => [:user_name, :phone_number, :is_app_login, :is_profile_given, :status])
+    else
+      render :json => {:error_message => "Invalid Authentication you are not allow to do this action"}
+    end
+  end
+
   def update
     @user = User.find(params[:id])
 
