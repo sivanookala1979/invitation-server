@@ -570,7 +570,7 @@ class EventsController < ApplicationController
         else
           distance = "not available"
         end
-        location_information << LocationInformation.new(@user.user_name, @user.phone_number, @user_location.latitude, @user_location.longitude, distance, @user_location.time)
+        location_information << LocationInformation.new(@user.user_name, @user.phone_number, @user_location.latitude.present? ? @user_location.latitude : " ", @user_location.longitude.present? ? @user_location.longitude : " 0", distance, @user_location.time)
       end
     end
     if request.format == 'json'
