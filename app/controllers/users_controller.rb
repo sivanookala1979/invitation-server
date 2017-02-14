@@ -56,13 +56,14 @@ class UsersController < ApplicationController
   end
 
   def log_in_with_mobile
-    @mobile_number_details = MobileLoginDetails.find_by_mobile_number(params[:mobile_number])
+    mobile_number = params[:mobile_number].delete(' ')
+    @mobile_number_details = MobileLoginDetails.find_by_mobile_number(mobile_number)
     if @mobile_number_details.present?
       @mobile_number_details.update_attribute(:otp, ApplicationHelper.get_otp)
       ##send_sms(@mobile_number_details.mobile_number, "Dear Customer, your NETSECURE code is #{@mobile_number_details.otp} .")
     else
       @mobile_number_details = MobileLoginDetails.new
-      @mobile_number_details.mobile_number = params[:mobile_number]
+      @mobile_number_details.mobile_number = mobile_number
       @mobile_number_details.otp=ApplicationHelper.get_otp
       @mobile_number_details.is_valid=true
       @mobile_number_details.save
@@ -74,15 +75,16 @@ class UsersController < ApplicationController
   end
 
   def register_with_mobile
-    @mobile_number_details = MobileLoginDetails.where('mobile_number =? and is_valid =?', params[:mobile_number], true)
+    mobile_number = params[:mobile_number].delete(' ') if params[:mobile_number].present?
+    @mobile_number_details = MobileLoginDetails.where('mobile_number =? and is_valid =?', mobile_number, true) if mobile_number.present?
     ##if @mobile_number_details.present? && @mobile_number_details.otp.eql?(params[:otp])
     if (true)
-      user = User.find_by_phone_number(params[:mobile_number])
+      user = User.find_by_phone_number(mobile_number) if mobile_number.present?
       user.update_attribute(:is_app_login, true) if user.present?
-      if user.blank?
+      if user.blank? && mobile_number.present?
         user = User.new
-        user.phone_number = params[:mobile_number]
-        user.user_name = params[:mobile_number]
+        user.phone_number = mobile_number
+        user.user_name = mobile_number
         user.is_app_login = true
         user.save
       end
