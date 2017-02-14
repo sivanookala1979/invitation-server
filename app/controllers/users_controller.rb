@@ -55,57 +55,6 @@ class UsersController < ApplicationController
     end
   end
 
-  def create_user
-    user = User.find_by_phone_number(params[:phone_number])
-    status=''
-    if user.present?
-      status="User already existed"
-      user.update_attribute("is_app_login", true)
-      user_access_token = UserAccessTokens.find_by_user_id(user.id)
-      if user_access_token.blank?
-        user_access_token = UserAccessTokens.new
-        user_access_token.user_id = user.id
-        user_access_token.access_token = UUIDTools::UUID.random_create.to_s.delete '-' + 'user_access_token'
-        user_access_token.save
-      end
-    else
-      user=User.new
-      user.user_name = params[:user_name]
-      user.phone_number = params[:phone_number]
-      user.is_app_login = true
-      status="Success"
-      user.save
-      user_access_token = UserAccessTokens.find_by_user_id(user.id)
-      if user_access_token.blank?
-        user_access_token = UserAccessTokens.new
-        user_access_token.user_id = user.id
-        user_access_token.access_token = UUIDTools::UUID.random_create.to_s.delete '-' + 'user_access_token'
-        user_access_token.save
-      end
-    end
-    if request.format == 'json'
-      if status.eql?('Success')
-        render :json => {:id => user.id, :status => status, :access_token => user_access_token.access_token}
-      else
-        render :json => {:status => status}
-      end
-    end
-  end
-
-  def login
-    status=''
-    user = User.find_by_phone_number(params[:phone_number])
-    if request.format == 'json'
-      if !user.blank?
-        user_access_token = UserAccessTokens.find_by_user_id(user.id)
-      render :json => {:id => user.id, :access_token => user_access_token.access_token}
-
-    else
-      render :json => { :status=> "User not exist with this mobile number"}
-      end
-    end
-    end
-
   def log_in_with_mobile
     @mobile_number_details = MobileLoginDetails.find_by_mobile_number(params[:mobile_number])
     if @mobile_number_details.present?
@@ -113,7 +62,7 @@ class UsersController < ApplicationController
       ##send_sms(@mobile_number_details.mobile_number, "Dear Customer, your NETSECURE code is #{@mobile_number_details.otp} .")
     else
       @mobile_number_details = MobileLoginDetails.new
-      @mobile_number_details.mobile_number = params[:mobile_number].strip!
+      @mobile_number_details.mobile_number = params[:mobile_number]
       @mobile_number_details.otp=ApplicationHelper.get_otp
       @mobile_number_details.is_valid=true
       @mobile_number_details.save
@@ -128,11 +77,11 @@ class UsersController < ApplicationController
     @mobile_number_details = MobileLoginDetails.where('mobile_number =? and is_valid =?', params[:mobile_number], true)
     ##if @mobile_number_details.present? && @mobile_number_details.otp.eql?(params[:otp])
     if (true)
-      user = User.find_by_phone_number(params[:mobile_number].strip!)
+      user = User.find_by_phone_number(params[:mobile_number])
       user.update_attribute(:is_app_login, true) if user.present?
       if user.blank?
         user = User.new
-        user.phone_number = params[:mobile_number].strip!
+        user.phone_number = params[:mobile_number]
         user.user_name = params[:mobile_number]
         user.is_app_login = true
         user.save
