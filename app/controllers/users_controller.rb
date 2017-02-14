@@ -113,7 +113,7 @@ class UsersController < ApplicationController
       ##send_sms(@mobile_number_details.mobile_number, "Dear Customer, your NETSECURE code is #{@mobile_number_details.otp} .")
     else
       @mobile_number_details = MobileLoginDetails.new
-      @mobile_number_details.mobile_number = params[:mobile_number]
+      @mobile_number_details.mobile_number = params[:mobile_number].strip!
       @mobile_number_details.otp=ApplicationHelper.get_otp
       @mobile_number_details.is_valid=true
       @mobile_number_details.save
@@ -128,11 +128,11 @@ class UsersController < ApplicationController
     @mobile_number_details = MobileLoginDetails.where('mobile_number =? and is_valid =?', params[:mobile_number], true)
     ##if @mobile_number_details.present? && @mobile_number_details.otp.eql?(params[:otp])
     if (true)
-      user = User.find_by_phone_number(params[:mobile_number])
+      user = User.find_by_phone_number(params[:mobile_number].strip!)
       user.update_attribute(:is_app_login, true) if user.present?
       if user.blank?
         user = User.new
-        user.phone_number = params[:mobile_number]
+        user.phone_number = params[:mobile_number].strip!
         user.user_name = params[:mobile_number]
         user.is_app_login = true
         user.save
