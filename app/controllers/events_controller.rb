@@ -548,8 +548,9 @@ class EventsController < ApplicationController
 
   def invitees_locations
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
-    @user = User.find_by_id(user_access_token.user_id)
+    @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
     @event = Event.find_by_id(params[:event_id])
+
     if @user.present? && @event.present?
       @event_admin = EventAdmins.find_by_user_id_and_event_id(@user.id, @event.id)
       if @event_admin.present?
@@ -557,23 +558,21 @@ class EventsController < ApplicationController
       else
         @invitations = Invitation.find_all_by_event_id_and_is_location_provide(@event.id, true)
       end
-
-      all_user_ids = []
-      @invitations.each do |invitation|
-        all_user_ids << invitation.participant_id
-      end
       location_information = []
-      if all_user_ids.present?
-      all_user_ids.each do |user_id|
-        @user_location = UserLocation.find_all_by_user_id(user_id).last
-        if @event.longitude.present?&&@event.latitude.present?&&@user_location.longitude.present?&&@user_location.latitude.present?
-          distance= getDistanceFromLatLonInKm(@event.latitude, @event.longitude, @user_location.latitude, @user_location.longitude)
-        else
-          distance = "not available"
+      if @invitations.present?
+        @invitations.each do |invitation|
+          @user_location = UserLocation.find_all_by_user_id(invitation.participant_id).last
+          if @user_location.present? && @event.longitude.present? && @event.latitude.present? && @user_location.longitude.present? && @user_location.latitude.present?
+            distance= getDistanceFromLatLonInKm(@event.latitude, @event.longitude, @user_location.latitude, @user_location.longitude)
+          else
+            distance = "not available"
+          end
+          lat = @user_location.present? && @user_location.latitude.present? ? @user_location.latitude.present : ""
+          lan = @user_location.present? && @user_location.longitude.present? ? @user_location.longitude : " "
+          time = @user_location.present? && @user_location.time.present? ? @user_location.time : " "
+          location_information << LocationInformation.new(@user.user_name, @user.phone_number, lat, lan, distance,time)
         end
-        location_information << LocationInformation.new(@user.user_name, @user.phone_number, @user_location.latitude.present? ? @user_location.latitude : " ", @user_location.longitude.present? ? @user_location.longitude : " 0", distance, @user_location.time)
       end
-        end
     end
     if request.format == 'json'
       if @user.present? && @event.present?
