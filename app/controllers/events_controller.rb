@@ -296,12 +296,14 @@ class EventsController < ApplicationController
     event_invitation = Event.find_by_id(params[:event_id])
     event_invitation.accepted_count = 0 if event_invitation.accepted_count.blank?
     event_invitation.rejected_count = 0 if event_invitation.rejected_count.blank?
-    if invitation_details.is_accepted.blank?
-      invitation_details.is_accepted=params[:accepted]
+    if invitation_details.present?
+      invitation_details.is_accepted = params[:accepted]
       if (invitation_details.is_accepted.eql?(true))
-        invitation_details.update_attribute(:is_location_provide,params[:is_location_provide]) if params[:is_location_provide].present?
-        invitation_details.update_attribute(:is_distance_provide,params[:is_distance_provide]) if params[:is_distance_provide].present?
-        invitation_details.update_attribute(:is_not_share,params[:is_not_share]) if params[:is_not_share].present?
+        if params[:permission].present?
+          invitation_details.update_attribute(:is_location_provide, true) if params[:permission].present? && params[:permission].eql?("LOCATION")
+          invitation_details.update_attribute(:is_distance_provide, true) if params[:permission].present? && params[:permission].eql?("DISTANCE")
+          invitation_details.update_attribute(:is_not_share, true) if params[:permission].present? && params[:permission].eql?("NOTHING")
+        end
         event_invitation.accepted_count =event_invitation.accepted_count+1
       else
         event_invitation.rejected_count = event_invitation.rejected_count+1
