@@ -563,6 +563,7 @@ class EventsController < ApplicationController
         all_user_ids << invitation.participant_id
       end
       location_information = []
+      if all_user_ids.present?
       all_user_ids.each do |user_id|
         @user_location = UserLocation.find_all_by_user_id(user_id).last
         if @event.longitude.present?&&@event.latitude.present?&&@user_location.longitude.present?&&@user_location.latitude.present?
@@ -572,6 +573,7 @@ class EventsController < ApplicationController
         end
         location_information << LocationInformation.new(@user.user_name, @user.phone_number, @user_location.latitude.present? ? @user_location.latitude : " ", @user_location.longitude.present? ? @user_location.longitude : " 0", distance, @user_location.time)
       end
+        end
     end
     if request.format == 'json'
       if @user.present? && @event.present?
