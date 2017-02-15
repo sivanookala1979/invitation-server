@@ -1,4 +1,10 @@
 InvtappServer::Application.routes.draw do
+  resources :chat_rooms do
+    get :get_chats, :on => :collection
+    get :post_inter_chat_message, :on => :collection
+    get :get_inter_chat_messages, :on => :collection
+  end
+
   resources :currencies
 
   resources :groups do

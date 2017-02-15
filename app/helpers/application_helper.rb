@@ -8,6 +8,15 @@ module ApplicationHelper
     end
     result
   end
+
+  def get_time_format_app(date)
+    result=''
+    if !date.blank?
+      result = date.utc.in_time_zone('Kolkata').strftime("%d %b %Y %H:%M")
+    end
+    result
+  end
+
   def get_index_text(value)
     "<div class=\"row\">
   <div class=\"col-sm-12\" style=\"padding-left: 10px;\">

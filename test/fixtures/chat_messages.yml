@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  chat_room_id: 1
+  from_id: 1
+  message: MyString
+
+two:
+  chat_room_id: 1
+  from_id: 1
+  message: MyString

@@ -1,0 +1,27 @@
+<h1>Listing chat_rooms</h1>
+
+<table>
+  <tr>
+    <th>User</th>
+    <th>Other</th>
+    <th>Support</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @chat_rooms.each do |chat_room| %>
+  <tr>
+    <td><%= chat_room.user_id %></td>
+    <td><%= chat_room.other_id %></td>
+    <td><%= chat_room.support %></td>
+    <td><%= link_to 'Show', chat_room %></td>
+    <td><%= link_to 'Edit', edit_chat_room_path(chat_room) %></td>
+    <td><%= link_to 'Destroy', chat_room, confirm: 'Are you sure?', method: :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Chat room', new_chat_room_path %>

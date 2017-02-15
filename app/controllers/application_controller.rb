@@ -11,7 +11,7 @@ class ApplicationController < ActionController::Base
     if current_user_session.blank? || current_user_session.record.blank?
       access_token_key = request.headers['Authorization']
       if  !access_token_key.blank?
-        access_token = UserAccessToken.find_by_access_token(access_token_key)
+        access_token = UserAccessTokens.find_by_access_token(access_token_key)
         if !access_token.blank?
           current_user_record = User.find_by_id(access_token.user_id)
           @user_session = UserSession.create(current_user_record, false)
@@ -22,5 +22,4 @@ class ApplicationController < ActionController::Base
 
     @current_user = current_user_session && current_user_session.record
   end
-
 end
