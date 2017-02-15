@@ -12,6 +12,7 @@ gem 'uuidtools'
 gem 'bootstrap-sass', '~> 3.2.0'
 gem 'authlogic'
 gem 'declarative_authorization'
+gem 'gcm'
 
 # Gems used only for assets and not required
 # in production environments by default.
