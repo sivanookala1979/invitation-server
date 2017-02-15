@@ -182,6 +182,7 @@ class ChatRoomsController < ApplicationController
       end
       chat_room_view_object
     }
+    @chat_room_view_objects = []
     if @chat_room_view_objects_individual.present? && @chat_room_view_objects_group.present?
       @chat_room_view_objects = @chat_room_view_objects_individual+@chat_room_view_objects_group
     elsif @chat_room_view_objects_individual.present?
