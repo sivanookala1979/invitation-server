@@ -138,6 +138,18 @@ class UsersController < ApplicationController
     end
   end
 
+
+  def store_gcm_code
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
+    if @user.present?
+      @user.update_attribute(:gcm_code, params[:gcm_code])
+      render :json => {:user_id => @user.id}
+    else
+      render :json => {:error_message => 'Invalid User.'}
+    end
+  end
+
   def update
     @user = User.find(params[:id])
 
