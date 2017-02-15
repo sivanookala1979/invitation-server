@@ -568,7 +568,7 @@ class EventsController < ApplicationController
           else
             distance = "not available"
           end
-          lat = @user_location.present? && @user_location.latitude.present? ? @user_location.latitude.present : ""
+          lat = @user_location.present? && @user_location.latitude.present? ? @user_location.latitude : ""
           lan = @user_location.present? && @user_location.longitude.present? ? @user_location.longitude : " "
           time = @user_location.present? && @user_location.time.present? ? @user_location.time : " "
           location_information << LocationInformation.new(@user.user_name, @user.id, @user.phone_number, lat, lan, distance, time)
