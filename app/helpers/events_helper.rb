@@ -1,7 +1,7 @@
 module EventsHelper
 
   class InvitationDetails
-    attr_accessor :name, :mobile, :is_accepted, :distance, :update_at
+    attr_accessor :name,:user_id, :mobile, :is_accepted, :distance, :update_at
   end
 
   class EventDetails

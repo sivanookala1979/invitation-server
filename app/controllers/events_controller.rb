@@ -360,6 +360,7 @@ class EventsController < ApplicationController
       if user.present?
       invitation_details.name=user.user_name
       invitation_details.mobile=user.phone_number
+      invitation_details.user_id = user.id
       user_location = UserLocation.where('user_id=?', user.id).last
       if user_location.present?
         invitation_details.distance= getDistanceFromLatLonInKm(event.latitude, event.longitude, user_location.latitude, user_location.longitude)
