@@ -217,15 +217,10 @@ class ChatRoomsController < ApplicationController
       gcm = GCM.new('AIzaSyBfBtl4go_-zhG-6o122tN03ob15w_cvOY')
       registration_ids= [user.gcm_code]
       response = nil
-      if is_promotion
-        options = {data: {message: content, title: notification_type, image_url: image_url}}
-        response = gcm.send_to_topic('global', options)
-      else
         options = {data: {message: content, title: notification_type, support_message: (from_user_id == SUPPORT_CHAT_USER_ID), from_user_id: from_user_id}, collapse_key: 'updated_score'}
         response = gcm.send(registration_ids, options)
         gcm_results = JSON.parse(response[:body])['results'][0]
         @error_message = gcm_results['error']
-      end
       @error_message ||= 'Successfully posted.'
     end
   end
