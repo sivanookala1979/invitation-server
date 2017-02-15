@@ -35,10 +35,11 @@ module EventsHelper
 
 
   class LocationInformation
-    attr_accessor :user_name, :mobile_number, :latitude, :longitude, :distance, :time
+    attr_accessor :user_name,:user_id, :mobile_number, :latitude, :longitude, :distance, :time
 
-    def initialize(user_name, mobile_number, latitude, longitude, distance, time)
+    def initialize(user_name,user_id, mobile_number, latitude, longitude, distance, time)
       @user_name = user_name
+      @user_id = user_id
       @mobile_number = mobile_number
       @latitude = latitude
       @longitude = longitude
