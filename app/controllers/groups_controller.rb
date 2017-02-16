@@ -66,27 +66,32 @@ class GroupsController < ApplicationController
       if group.present? && params[:contact_numbers].present?
         contact_numbers = params[:contact_numbers].split(',')
         contact_numbers.each do |number|
-          user = User.find_by_phone_number(number)
-          if user.blank?
-            user = User.new
-            user.user_name = number
-            user.phone_number = number
-            user.save
-            user_access_token = UserAccessTokens.find_by_user_id(user.id)
-            if user_access_token.blank?
-              user_access_token = UserAccessTokens.new
-              user_access_token.user_id = user.id
-              user_access_token.access_token = UUIDTools::UUID.random_create.to_s.delete '-' + 'user_access_token'
-              user_access_token.save
+          if number.present?
+            mobile_number = params[:number].delete(' ')
+            user = User.find_by_phone_number(mobile_number)
+            if user.blank?
+              if mobile_number.present?
+                user = User.new
+                user.user_name = mobile_number
+                user.phone_number = mobile_number
+                user.save
+              end
+              user_access_token = UserAccessTokens.find_by_user_id(user.id)
+              if user_access_token.blank?
+                user_access_token = UserAccessTokens.new
+                user_access_token.user_id = user.id
+                user_access_token.access_token = UUIDTools::UUID.random_create.to_s.delete '-' + 'user_access_token'
+                user_access_token.save
+              end
             end
+            group_member = GroupMembers.new
+            group_member.group_id = group.id
+            group_member.user_id = user.id
+            group_member.user_name = user.user_name
+            group_member.user_mobile_number = user.phone_number
+            group_member.is_group_admin = false
+            group_member.save
           end
-          group_member = GroupMembers.new
-          group_member.group_id = group.id
-          group_member.user_id = user.id
-          group_member.user_name = user.user_name
-          group_member.user_mobile_number = user.phone_number
-          group_member.is_group_admin = false
-          group_member.save
         end
       end
       admin_group_member = GroupMembers.find_by_user_id_and_group_id(@user.id, group.id) if group.present?
