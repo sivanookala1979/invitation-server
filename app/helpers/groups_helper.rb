@@ -1,14 +1,14 @@
 module GroupsHelper
   class GroupInformation
-    attr_accessor :group_id, :group_name, :create_person_name, :create_person_id, :created_at, :group_members
+    attr_accessor :group_id, :group_name, :create_person_name, :create_person_id, :created_at
 
-    def initialize(group_id, group_name, create_person_name, create_person_id, created_at, group_members)
+    def initialize(group_id, group_name, create_person_name, create_person_id,created_person_mobile, created_at)
       @group_id = group_id
       @group_name = group_name
       @create_person_name = create_person_name
       @create_person_id = create_person_id
+      @created_person_mobile = created_person_mobile
       @created_at = created_at
-      @group_members = group_members
     end
   end
   class Group_member

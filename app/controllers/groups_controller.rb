@@ -127,13 +127,9 @@ class GroupsController < ApplicationController
       group_ids.each do |group_id|
         @group = Group.find_by_id(group_id)
         @group_members = GroupMembers.find_all_by_group_id(group_id)
-        group_members =[]
-        @group_members.each do |member|
-          user = User.find_by_id(member.user_id)
-          group_members << Group_member.new(member.id, member.is_group_admin, member.user_id, user.phone_number, user.user_name)
-        end
+
         user = User.find_by_id(@group.owner_id)
-        group_information << GroupInformation.new(@group.id, @group.group_name, user.user_name, @group.owner_id, @group.created_at, group_members)
+        group_information << GroupInformation.new(@group.id, @group.group_name, user.user_name, @group.owner_id, user.phone_number, @group.created_at)
       end
     end
     if request.format == 'json'
@@ -141,6 +137,25 @@ class GroupsController < ApplicationController
         render :json => {:groups => group_information}
       else
         render :json => {:error_message => 'Invalid login details'}
+      end
+    end
+  end
+
+  def get_group_members
+    @group = Group.find_by_id(params[:group_id]) if params[:group_id].present?
+    @group_members = GroupMembers.find_all_by_group_id(@group.id) if @group.present?
+    group_members =[]
+    if @group_members.present?
+      @group_members.each do |member|
+        user = User.find_by_id(member.user_id)
+        group_members << Group_member.new(member.id, member.is_group_admin, member.user_id, user.phone_number, user.user_name)
+      end
+    end
+    if request.format == 'json'
+      if @group.present?
+        render :json => {:group_members => group_members}
+      else
+        render :json => {:error_message => 'there is no group with this id'}
       end
     end
   end
