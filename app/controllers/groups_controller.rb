@@ -67,7 +67,7 @@ class GroupsController < ApplicationController
         contact_numbers = params[:contact_numbers].split(',')
         contact_numbers.each do |number|
           if number.present?
-            mobile_number = params[:number].delete(' ')
+            mobile_number = number.delete(' ')
             user = User.find_by_phone_number(mobile_number)
             if user.blank?
               if mobile_number.present?
