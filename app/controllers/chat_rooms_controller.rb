@@ -118,7 +118,14 @@ class ChatRoomsController < ApplicationController
     else
       status=false
     end
-    post_gcm_message(@message.message, params[:other_id], @user.id, '', "Chat")
+    if is_group
+      @group_members = GroupMembers.find_all_by_group_id(params[:other_id])
+      @group_members.each do |member|
+        post_gcm_message(@message.message, member.user_id, @user.id, '', "Chat",true)
+      end
+    else
+      post_gcm_message(@message.message, params[:other_id], @user.id, '', "Chat",false)
+    end
     respond_to do |format|
       format.json { render :json=>{:status => status } }
     end
@@ -151,6 +158,7 @@ class ChatRoomsController < ApplicationController
       chat_room_view_object.chat_room_id = chat_room.id
       chat_room_view_object.unread_messages_count = 0
       chat_room_view_object.sort_date_time = Time.now - 2.year
+      chat_room_view_object.is_group = false
       if user.present?
         picture = Images.find_by_id(user.image_id)
         chat_room_view_object.image_url = picture.present? ? root_url+"#{picture.image_path.url(:small)}" : ''
@@ -170,6 +178,7 @@ class ChatRoomsController < ApplicationController
       group = Group.find_by_id(chat_room_view_object.other_user_id)
       chat_room_view_object.other_user_name = group.present? && group.name.present? ? group.name : ''
       chat_room_view_object.chat_room_id = chat_room.id
+      chat_room_view_object.is_group = true
       if group.present?
         picture = Images.find_by_id(user.image_id)
         chat_room_view_object.image_url = picture.present? ? root_url+"#{picture.image_path.url(:small)}" : ''
@@ -210,14 +219,14 @@ class ChatRoomsController < ApplicationController
   end
 
   SUPPORT_CHAT_USER_ID = -999
-  def post_gcm_message(content, to_user_id, from_user_id, image_url, notification_type)
+  def post_gcm_message(content, to_user_id, from_user_id, image_url, notification_type,is_group)
     user = User.find_by_id(to_user_id)
     @error_message = nil
     if user.present? && user.gcm_code.present?
       gcm = GCM.new('AIzaSyBfBtl4go_-zhG-6o122tN03ob15w_cvOY')
       registration_ids= [user.gcm_code]
       response = nil
-        options = {data: {message: content, title: notification_type, support_message: (from_user_id == SUPPORT_CHAT_USER_ID), from_user_id: from_user_id}, collapse_key: 'updated_score'}
+        options = {data: {message: content, title: notification_type, support_message: (from_user_id == SUPPORT_CHAT_USER_ID), from_user_id: from_user_id, is_group: is_group}, collapse_key: 'updated_score'}
         response = gcm.send(registration_ids, options)
         gcm_results = JSON.parse(response[:body])['results'][0]
         @error_message = gcm_results['error']
