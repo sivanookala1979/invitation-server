@@ -240,15 +240,23 @@ class EventsController < ApplicationController
     if user_access_token.present?
       user = User.find_by_id(user_access_token.user_id)
       if !params[:event_ids].blank?
-        all_my_events = Event.where('id in (?) and hide =?', params[:event_ids].split(', '), false)
+        all_events = Event.where('id in (?) and hide =?', params[:event_ids].split(', '), false)
       else
         all_my_events = Event.find_all_by_owner_id_and_hide(user.id, false)
         invitations =Invitation.find_all_by_participant_id(user.id)
-        all_my_events << Event.where('id in(?)', invitations.collect { |invitation| invitation.event_id })
-        all_my_events.flatten!
-        all_my_events.uniq!
+        all_events << Event.where('id in(?)', invitations.collect { |invitation| invitation.event_id })
+        all_events.flatten!
+        all_events.uniq!
       end
-      all_my_events.sort! { |a, b| b.start_date <=> a.start_date }
+      all_events.sort! { |a, b| b.start_date <=> a.start_date }
+      all_my_events = []
+      all_events.each do |event|
+        @event_admin = EventAdmins.find_by_user_id_and_event_id(user.id, event.id)
+        is_admin = @event_admin.present? ? true : false
+        invitation = Invitation.find_by_event_id_and_participant_id(event.id, user.id)
+        is_accepted = invitation.present? && invitation.is_accepted.present? ? invitation.is_accepted : false
+        all_my_events << EventDetails.new(event.id.to_i, event.event_name, event.end_date, event.description, event.latitude, event.longitude, event.address, event.private, event.remainder, event.status, event.owner_id, event.start_date, event.invitees_count, event.accepted_count, event.rejected_count, event.is_manual_check_in, event.check_in_count, event.is_recurring_event, event.recurring_type, event.event_theme, is_accepted, is_admin)
+      end
     end
     if request.format == 'json'
       if user_access_token.present?
