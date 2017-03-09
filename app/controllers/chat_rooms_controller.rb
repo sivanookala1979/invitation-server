@@ -96,10 +96,9 @@ class ChatRoomsController < ApplicationController
     end
       @inter_messages = []
        @messages.each do |message|
-        user = User.find_by_id(message.from_id).try(:username)
+        user = User.find_by_id(message.from_id)
         @inter_messages << ChatSms.new(message.chat_room_id,message.from_id,user.user_name,message.message,message.created_at,get_time_format_app(message.updated_at))
        end
-
     respond_to do |format|
       format.json { render json: @inter_messages }
     end
