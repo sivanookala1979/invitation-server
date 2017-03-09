@@ -80,11 +80,12 @@ class UsersController < ApplicationController
     ##if @mobile_number_details.present? && @mobile_number_details.otp.eql?(params[:otp])
     if (true)
       user = User.find_by_phone_number(mobile_number) if mobile_number.present?
+      user.update_attribute(:user_name, params[:user_name]) if user.present?
       user.update_attribute(:is_app_login, true) if user.present?
       if user.blank? && mobile_number.present?
         user = User.new
         user.phone_number = mobile_number
-        user.user_name = mobile_number
+        user.user_name = params[:user_name]
         user.is_app_login = true
         user.save
       end
