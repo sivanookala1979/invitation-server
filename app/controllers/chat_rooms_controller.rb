@@ -123,10 +123,9 @@ class ChatRoomsController < ApplicationController
       if is_group
         @event = Event.find_by_id(params[:other_id])
         if @event.present?
-          @invitations = Invitation.where("event_id =? and is_accepted =? and participant_id=?", params[:other_id], true,!@user.id)
+          @invitations = Invitation.where("event_id =? and is_accepted =? and participant_id=?", @event.id, true,!@user.id)
           @invitations.each do |invitation|
-            @other_user = User.find_by_id(invitation.participant_id) if invitation.participant_id.present?
-            post_gcm_message(@message.message, invitation.participant_id, @user.id, @user.user_name, '', "Chat", true, @event.event_name, @event.id) if @other_user.present? && @other_user.is_app_login.eql?(true)
+            post_gcm_message(@message.message, invitation.participant_id, @user.id, @user.user_name, '', "Chat", true, @event.event_name, @event.id)
           end
         else
           status=false
