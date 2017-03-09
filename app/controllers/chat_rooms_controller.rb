@@ -85,9 +85,7 @@ class ChatRoomsController < ApplicationController
 #inter chat with group
   def get_inter_chat_messages
     is_group= false
-    if params[:is_group].present?
-      is_group = params[:is_group]
-    end
+    is_group = params[:is_group] if params[:is_group].present?
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
     if is_group
@@ -97,7 +95,7 @@ class ChatRoomsController < ApplicationController
       @messages = ChatMessage.where("chat_room_id =?" ,@inter_chat.id ).order('created_at DESC')
     end
       @inter_messages = []
-      @messages.each do |message|
+       @messages.each do |message|
         user = User.find_by_id(message.from_id).try(:username)
         @inter_messages << ChatSms.new(message.chat_room_id,message.from_id,user.user_name,message.message,message.created_at,get_time_format_app(message.updated_at))
        end
@@ -108,40 +106,36 @@ class ChatRoomsController < ApplicationController
   end
 
   def post_inter_chat_message
-    is_group= false
-    if params[:is_group].present?
-      is_group = params[:is_group]
-    end
+      is_group= false
+      is_group = params[:is_group]  if params[:is_group].present?
+
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
-    ensure_inter_chat_room(@user.id,params[:other_id], is_group) if !is_group
+    ensure_inter_chat_room(@user.id, params[:other_id], is_group) if !is_group
     @message = ChatMessage.new
     @message.from_id = @user.id
-    @message.chat_room_id = @inter_chat.id
+    @message.chat_room_id = @inter_chat.id if !is_group
     @message.message = params[:message]
     @message.event_id = params[:other_id] if is_group
     @message.save!
-    if @message.present?
-      status=true
-    else
-      status=false
-    end
-    if is_group
-      @event = Event.find_by_id(params[:other_id])
-      if @event.present?
-      @invitations = Invitation.where("event_id =? and is_accepted =?", params[:other_id], true)
-      @invitations.each do |invitation|
-        @other_user = User.find_by_id(invitation.participant_id) if invitation.participant_id.present?
-          post_gcm_message(@message.message, invitation.participant_id, @user.id,@user.user_name, '', "Chat", true,@event.event_name,@event.id) if @other_user.present? && @other_user.is_app_login.eql?(true) && !@other_user.id.eql?(@user.id)
-      end
+      status = @message.present? ? true : false
+
+      if is_group
+        @event = Event.find_by_id(params[:other_id])
+        if @event.present?
+          @invitations = Invitation.where("event_id =? and is_accepted =? and participant_id=?", params[:other_id], true,!@user.id)
+          @invitations.each do |invitation|
+            @other_user = User.find_by_id(invitation.participant_id) if invitation.participant_id.present?
+            post_gcm_message(@message.message, invitation.participant_id, @user.id, @user.user_name, '', "Chat", true, @event.event_name, @event.id) if @other_user.present? && @other_user.is_app_login.eql?(true)
+          end
+        else
+          status=false
+        end
       else
-        status=false
+        post_gcm_message(@message.message, params[:other_id], @user.id, @user.user_name, '', "Chat", false, "", "")
       end
-    else
-      post_gcm_message(@message.message, params[:other_id], @user.id,@user.user_name, '', "Chat",false,"","")
-    end
     respond_to do |format|
-      format.json { render :json=>{:status => status} }
+      format.json { render :json => {:status => status} }
     end
   end
 
