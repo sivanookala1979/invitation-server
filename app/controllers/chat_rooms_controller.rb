@@ -91,11 +91,13 @@ class ChatRoomsController < ApplicationController
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
     ensure_inter_chat_room(@user.id, params[:other_id], is_group)
-    @messages = ChatMessage.find_all_by_chat_room_id(@inter_chat.id)
-    @inter_messages = @messages.collect { |message|
-      message.updated_at = get_time_format_app(message.updated_at)
-      message
-    }
+    @messages = ChatMessage.find_all_by_chat_room_id(@inter_chat.id).order('created_at DESC')
+      @inter_messages = []
+      @messages.each do |message|
+        user = User.find_by_id(message.from_id).try(:username)
+        @inter_messages << ChatSms.new(message.chat_room_id,message.from_id,user.user_name,message.message,message.created_at,get_time_format_app(message.updated_at))
+       end
+
     respond_to do |format|
       format.json { render json: @inter_messages }
     end
@@ -119,15 +121,21 @@ class ChatRoomsController < ApplicationController
       status=false
     end
     if is_group
-      @group_members = GroupMembers.find_all_by_group_id(params[:other_id])
-      @group_members.each do |member|
-        post_gcm_message(@message.message, member.user_id, @user.id, '', "Chat",true)
+      @event = Event.find_by_id(params[:other_id])
+      if @event.present?
+      @invitations = Invitation.where("event_id =? and is_accepted =?", params[:other_id], true)
+      @invitations.each do |invitation|
+        @other_user = User.find_by_id(invitation.participant_id) if invitation.participant_id.present?
+          post_gcm_message(@message.message, invitation.participant_id, @user.id,@user.user_name, '', "Chat", true,@event.event_name,@event.id) if @other_user.present? && @other_user.is_app_login.eql?(true)
+      end
+      else
+        status=false
       end
     else
-      post_gcm_message(@message.message, params[:other_id], @user.id, '', "Chat",false)
+      post_gcm_message(@message.message, params[:other_id], @user.id,@user.user_name, '', "Chat",false,"","")
     end
     respond_to do |format|
-      format.json { render :json=>{:status => status } }
+      format.json { render :json=>{:status => status} }
     end
   end
 
@@ -218,20 +226,18 @@ class ChatRoomsController < ApplicationController
     end
   end
 
-  SUPPORT_CHAT_USER_ID = -999
-  def post_gcm_message(content, to_user_id, from_user_id, image_url, notification_type,is_group)
+  def post_gcm_message(content, to_user_id, from_user_id,user_name, image_url, notification_type,is_group,event_name,event_id)
     user = User.find_by_id(to_user_id)
     @error_message = nil
     if user.present? && user.gcm_code.present?
       gcm = GCM.new('AIzaSyBfBtl4go_-zhG-6o122tN03ob15w_cvOY')
       registration_ids= [user.gcm_code]
       response = nil
-        options = {data: {message: content, title: notification_type, support_message: (from_user_id == SUPPORT_CHAT_USER_ID), from_user_id: from_user_id, is_group: is_group}, collapse_key: 'updated_score'}
+        options = {data: {message: content, title: notification_type,from_user_id: from_user_id,from_user_name:user_name, is_group: is_group,event_name:event_name,event_id:event_id}, collapse_key: 'updated_score'}
         response = gcm.send(registration_ids, options)
         gcm_results = JSON.parse(response[:body])['results'][0]
         @error_message = gcm_results['error']
       @error_message ||= 'Successfully posted.'
     end
   end
-
 end
