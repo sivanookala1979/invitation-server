@@ -2,6 +2,7 @@ class ChatRoomsController < ApplicationController
   # GET /chat_rooms
   # GET /chat_rooms.json
   include ApplicationHelper
+  include ChatRoomsHelper
   def index
     @chat_rooms = ChatRoom.all
 

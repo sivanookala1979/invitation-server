@@ -6,7 +6,7 @@ module ChatRoomsHelper
   class ChatSms
     attr_accessor :chat_room_id, :from_id, :user_name, :message, :created_at, :updated_at
 
-    def initialize(chat_room_id, from_id, total_cost, max_allow_amount, description, offer_items)
+    def initialize(chat_room_id, from_id, user_name, message, created_at, updated_at)
       @chat_room_id = chat_room_id
       @from_id = from_id
       @user_name = user_name
