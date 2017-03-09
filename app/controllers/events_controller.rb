@@ -79,6 +79,10 @@ class EventsController < ApplicationController
       new_event.check_in_count = 0
       new_event.status= "Created" if params[:event_id].blank?
       new_event.owner_id = user.id
+      if params[:image].present?
+        image = save_image(params[:image])
+        new_event.update_attribute(:image_id, image.id) if image.present?
+      end
       new_event.save
       event_admin = EventAdmins.find_by_user_id_and_event_id(new_event.owner_id, new_event.id)
       if event_admin.blank?
@@ -211,7 +215,8 @@ class EventsController < ApplicationController
           is_admin = @event_admin.present? ? true : false
           invitation = Invitation.find_by_event_id_and_participant_id(event.id, user.id)
           is_accepted = invitation.present? && invitation.is_accepted.present? ? invitation.is_accepted : false
-          all_my_events << EventDetails.new(event.id.to_i,event.event_name, event.end_date, event.description, event.latitude, event.longitude, event.address, event.private, event.remainder, event.status, event.owner_id, event.start_date, event.invitees_count, event.accepted_count, event.rejected_count, event.is_manual_check_in, event.check_in_count, event.is_recurring_event, event.recurring_type, event.event_theme, is_accepted,is_admin)
+          img_url = (image = Image.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+          all_my_events << EventDetails.new(event.id.to_i,event.event_name, event.end_date, event.description, event.latitude, event.longitude, event.address, event.private, event.remainder, event.status, event.owner_id, event.start_date, event.invitees_count, event.accepted_count, event.rejected_count, event.is_manual_check_in, event.check_in_count, event.is_recurring_event, event.recurring_type, event.event_theme, is_accepted,is_admin,img_url)
         end
       else
         events = Event.where('owner_id in (?)', user.id).order('start_date DESC')
@@ -221,7 +226,8 @@ class EventsController < ApplicationController
           is_admin = @event_admin.present? ? true : false
           invitation = Invitation.find_by_event_id_and_participant_id(event.id, user.id)
           is_accepted = invitation.present? && invitation.is_accepted.present? ? invitation.is_accepted : false
-          all_my_events << EventDetails.new(event.id.to_i,event.event_name, event.end_date, event.description, event.latitude, event.longitude, event.address, event.private, event.remainder, event.status, event.owner_id, event.start_date, event.invitees_count, event.accepted_count, event.rejected_count, event.is_manual_check_in, event.check_in_count, event.is_recurring_event, event.recurring_type, event.event_theme, is_accepted,is_admin)
+          img_url = (image = Image.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+          all_my_events << EventDetails.new(event.id.to_i,event.event_name, event.end_date, event.description, event.latitude, event.longitude, event.address, event.private, event.remainder, event.status, event.owner_id, event.start_date, event.invitees_count, event.accepted_count, event.rejected_count, event.is_manual_check_in, event.check_in_count, event.is_recurring_event, event.recurring_type, event.event_theme, is_accepted,is_admin,img_url)
         end
       end
     end
