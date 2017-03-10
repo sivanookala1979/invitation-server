@@ -90,10 +90,10 @@ class ChatRoomsController < ApplicationController
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
     if is_group
-      @messages = ChatMessage.where("event_id =?" ,params[:other_id] ).order('created_at DESC')
+      @messages = ChatMessage.where("event_id =?" ,params[:other_id] )
     else
       ensure_inter_chat_room(@user.id, params[:other_id], is_group)
-      @messages = ChatMessage.where("chat_room_id =?" ,@inter_chat.id ).order('created_at DESC')
+      @messages = ChatMessage.where("chat_room_id =?" ,@inter_chat.id )
     end
       @inter_messages = []
        @messages.each do |message|
