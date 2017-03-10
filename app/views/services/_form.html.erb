@@ -1,0 +1,38 @@
+<%= form_for(@service) do |f| %>
+    <% if @service.errors.any? %>
+        <div id="error_explanation">
+          <h2><%= pluralize(@service.errors.count, "error") %> prohibited this service from being saved:</h2>
+
+          <ul>
+            <% @service.errors.full_messages.each do |msg| %>
+                <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+    <% end %>
+
+    <div class="row">
+      <div class="col-sm-8">
+
+        <div class="form-group">
+          <%= f.label :name, :class => 'control-label' %>
+          <br/>
+          <%= f.text_field :name, :placeholder => 'Name', :class => 'form-control' %>
+        </div>
+        <div class="form-group">
+          <%= f.label :image_id, :class => 'control-label' %>
+          <br/>
+          <%= f.file_field :image_id %>
+        </div>
+        <div class="form-group">
+          <%= f.label :is_active %>
+          <br/>
+          <%= f.check_box :is_active  %>
+        </div>
+        <div class="actions">
+          <%= f.submit(:class => 'btn btn-primary') %>
+          </dv>
+        </div>
+      </div>
+    </div>
+<% end %>

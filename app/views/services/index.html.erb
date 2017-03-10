@@ -1,0 +1,27 @@
+<div class="col-sm-12">
+  <div class="col-sm-6"><%= get_index_text('Services') %></div>
+  <div class="col-sm-6 text-right"><%= link_to 'New Service', new_service_path, :class => 'btn btn-primary' %></div>
+</div>
+<table class="table table-bordered " align="center">
+  <tr align="center" class="table_style text-center">
+    <th>Name</th>
+    <th>Image</th>
+    <th>Active</th>
+    <th></th>
+    <th></th>
+  </tr>
+
+  <% @services.each do |service| %>
+      <tr>
+        <td><%= service.name %></td>
+        <td><%= service.image_id %></td>
+        <td><%= service.is_active %></td>
+        <td><%= link_to 'Edit', edit_service_path(service) %></td>
+        <td><%= link_to 'Destroy', service, confirm: 'Are you sure?', method: :delete %></td>
+      </tr>
+  <% end %>
+</table>
+
+<br/>
+
+
