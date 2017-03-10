@@ -1,0 +1,35 @@
+
+<div class="col-sm-12">
+  <div class="col-sm-6"><%= get_index_text('Cities') %></div>
+  <div class="col-sm-6 text-right"><%= link_to 'New City', new_city_path, :class => 'btn btn-primary' %></div>
+</div>
+
+<table class="table table-bordered " align="center">
+  <tr align="center" class="table_style text-center">
+    <th>Name</th>
+    <th>Image</th>
+    <th>Active</th>
+    <th>Latitude</th>
+    <th>Longitude</th>
+    <th>Remarks</th>
+    <th>Pin code</th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @cities.each do |city| %>
+  <tr>
+    <td><%= city.name %></td>
+    <td><%= city.image_id %></td>
+    <td><%= city.active %></td>
+    <td><%= city.latitude %></td>
+    <td><%= city.longitude %></td>
+    <td><%= city.remarks %></td>
+    <td><%= city.pincode %></td>
+    <td><%= link_to 'Edit', edit_city_path(city) %></td>
+    <td><%= link_to 'Destroy', city, confirm: 'Are you sure?', method: :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+
