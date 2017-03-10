@@ -85,7 +85,7 @@ class UsersController < ApplicationController
       if user.blank? && mobile_number.present?
         user = User.new
         user.phone_number = mobile_number
-        user.user_name = params[:user_name]
+        user.user_name = params[:user_name] if params[:user_name].present?
         user.is_app_login = true
         user.save
       end
@@ -113,7 +113,7 @@ class UsersController < ApplicationController
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     if user_access_token.present?
       @user = User.find_by_id(user_access_token.user_id)
-      render :json => @user.as_json(:only => [:user_name, :phone_number, :is_app_login, :is_profile_given, :status])
+      render :json => @user.as_json(:only => [:user_name, :phone_number, :is_app_login, :is_profile_given,:status,:gender,:email])
     else
       render :json => {:error_message => "Invalid Authentication you are not allow to do this action"}
     end
@@ -127,13 +127,15 @@ class UsersController < ApplicationController
       @user.update_attribute(:phone_number, params[:phone_number]) if params[:phone_number].present?
       @user.update_attribute(:status, params[:status]) if params[:status].present?
       @user.update_attribute(:is_profile_given, true)
+      @user.update_attribute(:gender, params[:gender])
+      @user.update_attribute(:email, params[:email])
       if params[:image].present?
         image = save_image(params[:image])
         @user.update_attribute(:image_id, image.id) if image.present?
       end
     end
     if user_access_token.present?
-      render :json => @user.as_json(:only => [:user_name, :phone_number, :is_app_login, :is_profile_given, :status])
+      render :json => @user.as_json(:only => [:user_name, :phone_number, :is_app_login, :is_profile_given, :status,:gender,:email])
     else
       render :json => {:error_message => "Invalid Authentication you are not allow to do this action"}
     end
