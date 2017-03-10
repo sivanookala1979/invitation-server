@@ -386,6 +386,7 @@ class EventsController < ApplicationController
         invitation_details.distance= getDistanceFromLatLonInKm(event.latitude, event.longitude, user_location.latitude, user_location.longitude)
         invitation_details.update_at=distance_of_time_in_words(user_location.time, Time.now)
       end
+      invitation_details.email = user.email.present? ? user.email : ""
       invitation_details.img_url = (image = Images.find_by_id(user.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
       invitation_details_list<<invitation_details
       end
