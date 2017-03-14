@@ -125,7 +125,7 @@ class ChatRoomsController < ApplicationController
         if @event.present?
           @invitations = Invitation.where("event_id =? and is_accepted =?", @event.id, true)
           @invitations.each do |invitation|
-              if !invitation.participant_id.eql?(@user.id)
+              if (invitation.participant_id.to_i != @user.id)
               post_gcm_message(@message.message,invitation.participant_id, @user.id, @user.user_name, '', "Chat", true, @event.event_name, @event.id)
                 end
           end
