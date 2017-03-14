@@ -12,13 +12,15 @@ module GroupsHelper
     end
   end
   class Group_member
-    attr_accessor :group_member_id, :is_group_admin, :user_id, :user_mobile_number, :user_name
-    def initialize(group_member_id, is_group_admin, user_id, user_mobile_number, user_name)
+    attr_accessor :group_member_id, :is_group_admin, :user_id, :user_mobile_number, :user_name,:email,:img_url
+    def initialize(group_member_id, is_group_admin, user_id, user_mobile_number, user_name,email,img_url)
       @group_member_id = group_member_id
       @is_group_admin = is_group_admin
       @user_id = user_id
       @user_mobile_number = user_mobile_number
       @user_name = user_name
+      @email = email
+      @img_url = img_url
     end
   end
 end

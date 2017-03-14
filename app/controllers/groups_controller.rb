@@ -148,7 +148,8 @@ class GroupsController < ApplicationController
     if @group_members.present?
       @group_members.each do |member|
         user = User.find_by_id(member.user_id)
-        group_members << Group_member.new(member.id, member.is_group_admin, member.user_id, user.phone_number, user.user_name)
+        img_url = (image = Images.find_by_id(user.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+        group_members << Group_member.new(member.id, member.is_group_admin, member.user_id, user.phone_number, user.user_name,user.email,img_url)
       end
     end
     if request.format == 'json'
