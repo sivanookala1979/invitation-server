@@ -43,6 +43,7 @@ InvtappServer::Application.routes.draw do
     get :get_all_events, :on => :collection
     get :invitees_locations, :on => :collection
     get :invitees_distances, :on => :collection
+    get :get_all_events_information, :on => :collection
   end
 
   resources :users do

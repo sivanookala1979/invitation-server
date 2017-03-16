@@ -1,7 +1,7 @@
 module EventsHelper
 
   class InvitationDetails
-    attr_accessor :name,:user_id, :mobile, :is_accepted, :distance, :update_at,:email,:img_url
+    attr_accessor :name,:user_id, :mobile, :is_accepted, :distance, :update_at,:email,:img_url,:is_admin
   end
 
   class EventDetails
@@ -58,6 +58,54 @@ module EventsHelper
       @mobile_number = mobile_number
       @distance = distance
       @time = time
+    end
+  end
+
+
+  class Event_information
+    attr_accessor :id, :event_name, :start_date, :end_date, :latitude, :longitude, :address, :invitees_count, :accepted_count, :rejected_count, :check_in_count, :is_manual_check_in, :image_url, :description, :private, :remainder, :status, :owner_id, :is_recurring_event, :recurring_type, :is_admin, :is_expire, :event_theme,:is_my_event,:owner_information,:invitation_information
+
+    def initialize(id, event_name, start_date, end_date, latitude, longitude, address, invitees_count, accepted_count, rejected_count, check_in_count, is_manual_check_in, image_url, description, private, remainder, status, owner_id, is_recurring_event, recurring_type, is_admin, is_expire, event_theme,is_my_event,owner_information,invitation_information)
+      @id = id
+      @event_name = event_name
+      @end_date = end_date
+      @start_date = start_date
+      @latitude = latitude
+      @longitude = longitude
+      @address = address
+      @invitees_count = invitees_count
+      @accepted_count = accepted_count
+      @rejected_count = rejected_count
+      @check_in_count =check_in_count
+      @is_manual_check_in =is_manual_check_in
+      @image_url = image_url
+      @description = description
+      @private = private
+      @remainder =remainder
+      @status = status
+      @owner_id = owner_id
+      @is_recurring_event =is_recurring_event
+      @recurring_type =recurring_type
+      @is_admin = is_admin
+      @is_expire = is_expire
+      @event_theme = event_theme
+      @is_my_event = is_my_event
+      @owner_information = owner_information
+      @invitation_information = invitation_information
+    end
+  end
+
+  class OwnerInformation
+    attr_accessor :id, :user_name, :phone_number, :email, :status, :owner_img
+
+    def initialize(id, user_name, phone_number, email, status, owner_img)
+      @id = id
+      @user_name = user_name
+      @phone_number = phone_number
+      @email = email
+      @status = status
+      @owner_img = owner_img
+
     end
   end
 

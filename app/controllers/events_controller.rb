@@ -390,6 +390,8 @@ class EventsController < ApplicationController
       end
       invitation_details.email = user.email.present? ? user.email : ""
       invitation_details.img_url = (image = Images.find_by_id(user.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+      @event_admin = EventAdmins.find_by_event_id_and_user_id(event.id,invitation.participant_id)
+      invitation_details.is_admin = @event_admin.present? ? true : false
       invitation_details_list<<invitation_details
       end
     end
@@ -646,4 +648,70 @@ class EventsController < ApplicationController
   end
 
 
+  def get_all_events_information
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
+    if @user.present?
+      event_information = []
+      @my_events = Event.find_all_by_owner_id(@user.id)
+      @my_invitation_events = Invitation.find_all_by_participant_id(@user.id)
+      my_invitation_event_ids = []
+      @my_invitation_events.each do |my_invitation|
+        my_invitation_event_ids << my_invitation.event_id
+      end
+      my_event_ids= []
+      @my_events.each do |event|
+        my_event_ids << event.id
+      end
+      event_ids = my_invitation_event_ids + my_event_ids
+      event_ids = event_ids.uniq
+
+      event_information = []
+      event_ids.each do |event_id|
+        event = Event.find_by_id(event_id)
+        img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+        @event_admin = EventAdmins.find_by_user_id_and_event_id(@user.id, event.id)
+        is_admin = @event_admin.present? ? true : false
+        is_expire = event.end_date <= Time.now
+        owner_info = User.find_by_id(event.owner_id)
+        owner_img = (image = Images.find_by_id(owner_info.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+        owner_information = OwnerInformation.new(owner_info.id, owner_info.user_name, owner_info.phone_number, owner_info.email, owner_info.status, owner_img)
+        is_my_event = event.owner_id.eql?(@user.id) ? true : false
+        @invitations = Invitation.find_all_by_event_id(event.id)
+        invitation_information = []
+        @invitations.each do |invitation|
+          invitation_details = InvitationDetails.new
+          invitation_details.is_accepted=invitation.is_accepted
+          user = User.find_by_id(invitation.participant_id)
+          user = User.find_by_phone_number(invitation.participant_mobile_number) if user.blank?
+          if user.present?
+            invitation_details.name=user.user_name
+            invitation_details.mobile=user.phone_number
+            invitation_details.user_id = user.id
+            user_location = UserLocation.where('user_id=?', user.id).last
+            if user_location.present?
+              invitation_details.distance= getDistanceFromLatLonInKm(event.latitude, event.longitude, user_location.latitude, user_location.longitude)
+              invitation_details.update_at=distance_of_time_in_words(user_location.time, Time.now)
+            end
+            invitation_details.email = user.email.present? ? user.email : ""
+            invitation_details.img_url = (image = Images.find_by_id(user.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+            @event_admin = EventAdmins.find_by_event_id_and_user_id(event.id,invitation.participant_id)
+            invitation_details.is_admin = @event_admin.present? ? true : false
+            invitation_information<<invitation_details
+          end
+
+        end
+        event_information << Event_information.new(event.id, event.event_name, event.start_date, event.end_date, event.latitude, event.longitude, event.address, event.invitees_count, event.accepted_count, event.rejected_count, event.check_in_count, event.is_manual_check_in, img_url, event.description, event.private, event.remainder, event.status, event.owner_id, event.is_recurring_event, event.recurring_type, is_admin, is_expire, event.event_theme, is_my_event, owner_information, invitation_information)
+      end
+    end
+
+    if request.format == 'json'
+      if @user.present?
+        render :json => {:event_information => event_information}
+      else
+        render :json => {:status => "Invalid Authentication you are not allow to do this action"}
+      end
+    end
+
+  end
 end
