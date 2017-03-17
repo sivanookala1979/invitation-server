@@ -1,4 +1,9 @@
 class Event < ActiveRecord::Base
+  def as_json(options = {})
+    options = super(options)
+    options[:image_path] = (image = Images.find_by_id(image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+    options
+  end
   def self.date_scope(start_date, end_date)
     if start_date.blank? && end_date.blank?
       scoped
