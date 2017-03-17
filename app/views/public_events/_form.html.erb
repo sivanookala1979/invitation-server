@@ -1,0 +1,82 @@
+<%= form_for(@public_event) do |f| %>
+    <% if @public_event.errors.any? %>
+        <div id="error_explanation">
+          <h2><%= pluralize(@public_event.errors.count, "error") %> prohibited this public_event from being saved:</h2>
+
+          <ul>
+            <% @public_event.errors.full_messages.each do |msg| %>
+                <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+    <% end %>
+
+    <div class="row">
+      <div class="col-sm-6">
+        <div class="form-group">
+          <%= f.label :event_name, :class => 'control-label' %>
+          <br/>
+          <%= f.text_field :event_name, :placeholder => 'Event Name', :class => 'form-control' %>
+        </div>
+        <div class="form-group">
+          <%= f.label :event_theme, :class => 'control-label' %>
+          <br/>
+          <%= f.text_field :event_theme, :placeholder => 'Event Theme', :class => 'form-control' %>
+        </div>
+        <div class="form-group">
+          <%= f.label :start_time , :class => 'control-label'%>
+          <br/>
+          <%= f.datetime_select :start_time %>
+        </div>
+        <div class="form-group">
+          <%= f.label :end_time , :class => 'control-label'%>
+          <br/>
+          <%= f.datetime_select :end_time %>
+        </div>
+        <div class="form-group">
+          <%= f.label :entry_fee, :class => 'control-label' %>
+          <br/>
+          <%= f.text_field :entry_fee, :placeholder => 'Event Fee', :class => 'form-control' %>
+        </div>
+        <div class="form-group">
+          <%= f.label :city_id, :class => 'control-label' %>
+          <br/>
+          <%= f.select(:city_id, options_for_select(City.all.collect { |u| [u.name, u.id] }, @public_event.city_id),{:prompt => 'Select city'}, :class => 'form-control ') %>
+        </div>
+        <div class="form-group">
+          <%= f.label :service_id, :class => 'control-label' %>
+          <br/>
+          <%= f.select(:service_id, options_for_select(Service.all.collect { |u| [u.name, u.id] }, @public_event.service_id),{:prompt => 'Select service Type'}, :class => 'form-control ' ) %>
+        </div>
+
+        </div>
+      <div class="col-sm-6">
+        <div class="form-group">
+          <%= f.label :description, :class => 'control-label' %>
+          <br/>
+          <%= f.text_area :description, :placeholder => 'Event Description', :class => 'form-control',:size=>"100*4" %>
+        </div>
+        <div class="form-group">
+          <%= f.label :address, :class => 'control-label' %>
+          <br/>
+          <%= f.text_field :address, :placeholder => 'Address', :class => 'form-control' %>
+        </div>
+        <div class="form-group">
+          <%= f.label :image_id, :class => 'control-label' %>
+          <br/>
+          <%= @public_event.image_id.present? ? image_tag(Images.find(@public_event.image_id).image_path.url(:small),:style =>"width:100px") : "Yoo are not uploaded a picture existing" %>
+          <%= f.file_field :image_id %>
+        </div>
+
+        <div class="form-group">
+          <%= f.label :is_active %>
+          <br/>
+          <%= f.check_box :is_active %>
+        </div>
+        <div class="actions">
+          <%= f.submit(:class => 'btn btn-warning') %>
+        </div>
+      </div>
+      </div>
+    </div>
+<% end %>

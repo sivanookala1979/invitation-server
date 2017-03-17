@@ -1,4 +1,6 @@
 InvtappServer::Application.routes.draw do
+  resources :public_events
+
   resources :cities do
     get :get_cities, :on => :collection
   end

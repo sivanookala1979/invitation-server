@@ -1,0 +1,41 @@
+
+<div class="row">
+  <div class="col-sm-6"><%= get_index_text('Public Events') %></div>
+  <div class="col-sm-6 text-right"><%= link_to 'New Public event', new_public_event_path  ,:class => 'btn btn-warning' %></div>
+</div>
+<table class="table table-bordered " align="center">
+  <tr align="center" class="table_style text-center">
+    <th>Event name</th>
+    <th>Event theme</th>
+    <th>Start time</th>
+    <th>End time</th>
+    <th>Entry fee</th>
+    <th>City</th>
+    <th>Service</th>
+    <th>Description</th>
+    <th>Image</th>
+    <th>Address</th>
+    <th>Is active</th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @public_events.each do |public_event| %>
+  <tr>
+    <td><%= public_event.event_name %></td>
+    <td><%= public_event.event_theme %></td>
+    <td><%= public_event.start_time %></td>
+    <td><%= public_event.end_time %></td>
+    <td><%= public_event.entry_fee %></td>
+    <td><%= public_event.city_id %></td>
+    <td><%= public_event.service_id %></td>
+    <td><%= public_event.description %></td>
+    <td><%= public_event.image_id %></td>
+    <td><%= public_event.address %></td>
+    <td><%= public_event.is_active %></td>
+    <td><%= link_to 'Edit', edit_public_event_path(public_event) %></td>
+    <td><%= link_to 'Destroy', public_event, confirm: 'Are you sure?', method: :delete %></td>
+  </tr>
+<% end %>
+</table>
+

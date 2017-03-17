@@ -1,0 +1,2 @@
+module PublicEventsHelper
+end
