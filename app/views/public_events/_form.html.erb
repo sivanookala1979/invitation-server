@@ -64,7 +64,7 @@
         <div class="form-group">
           <%= f.label :image_id, :class => 'control-label' %>
           <br/>
-          <%= @public_event.image_id.present? ? image_tag(Images.find(@public_event.image_id).image_path.url(:small),:style =>"width:100px") : "Yoo are not uploaded a picture existing" %>
+          <%= @public_event.image_id.present? ? image_tag(Images.find(@public_event.image_id).image_path.url(:small)) : "Yoo are not uploaded a picture existing" %>
           <%= f.file_field :image_id %>
         </div>
 
