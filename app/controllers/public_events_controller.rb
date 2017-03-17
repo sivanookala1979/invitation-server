@@ -1,6 +1,7 @@
 class PublicEventsController < ApplicationController
   # GET /public_events
   # GET /public_events.json
+  include ApplicationHelper
   def index
     @public_events = PublicEvent.all
 
@@ -73,7 +74,7 @@ class PublicEventsController < ApplicationController
 
   def upload_image
     if params[:public_event][:image_id].present?
-      image = ApplicationHelper.upload_image(params[:city][:image_id])
+      image = ApplicationHelper.upload_image(params[:public_event][:image_id])
       @public_event.update_attribute(:image_id, image.id)
     end
   end
@@ -89,4 +90,5 @@ class PublicEventsController < ApplicationController
       format.json { head :ok }
     end
   end
+
 end
