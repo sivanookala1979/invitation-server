@@ -1,4 +1,6 @@
 InvtappServer::Application.routes.draw do
+  resources :notifications
+
   resources :public_events
 
   resources :cities do
@@ -15,7 +17,10 @@ InvtappServer::Application.routes.draw do
     get :get_inter_chat_messages, :on => :collection
   end
 
-  resources :currencies
+  resources :currencies do
+    get :my_notifications, :on => :collection
+    get :clear_notifications, :on => :collection
+  end
 
   resources :groups do
     get :create_group, :on => :collection
@@ -47,6 +52,8 @@ InvtappServer::Application.routes.draw do
     get :invitees_distances, :on => :collection
     get :get_all_events_information, :on => :collection
     get :make_invite_as_admin_to_event, :on => :collection
+    get :delete_admins_form_events, :on => :collection
+
   end
 
   resources :users do

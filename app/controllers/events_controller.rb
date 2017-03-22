@@ -91,6 +91,7 @@ class EventsController < ApplicationController
         event_admins.user_id = new_event.owner_id
         event_admins.save
       end
+      notification(new_event.user_id, new_event.id, "Your event is created with the name #{new_event.event_name}.")
     end
     if request.format == 'json'
       if user_access_token.present?
@@ -654,10 +655,10 @@ class EventsController < ApplicationController
     if @user.present?
       event_information = []
       @my_events = Event.find_all_by_owner_id(@user.id)
-      @my_invitation_events = Invitation.find_all_by_participant_id(@user.id)
+      @my_invitation_events = Invitation.find_all_by_participant_id_and_is_blocked(@user.id,false)
       my_invitation_event_ids = []
       @my_invitation_events.each do |my_invitation|
-        my_invitation_event_ids << my_invitation.event_id
+        my_invitation_event_ids << my_invitation.event_id if !my_invitation.hide
       end
       my_event_ids= []
       @my_events.each do |event|
@@ -677,6 +678,8 @@ class EventsController < ApplicationController
         owner_img = (image = Images.find_by_id(owner_info.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
         owner_information = OwnerInformation.new(owner_info.id, owner_info.user_name, owner_info.phone_number, owner_info.email, owner_info.status, owner_img)
         is_my_event = event.owner_id.eql?(@user.id) ? true : false
+        invitation = Invitation.find_by_event_id_and_participant_id(event_id,@user.id)
+        is_accepted = is_my_event || (invitation.present? && invitation.is_accepted) ? true : false
         @invitations = Invitation.find_all_by_event_id(event.id)
         invitation_information = []
         @invitations.each do |invitation|
@@ -701,7 +704,7 @@ class EventsController < ApplicationController
           end
 
         end
-        event_information << Event_information.new(event.id, event.event_name, event.start_date, event.end_date, event.latitude, event.longitude, event.address, event.invitees_count, event.accepted_count, event.rejected_count, event.check_in_count, event.is_manual_check_in, img_url, event.description, event.private, event.remainder, event.status, event.owner_id, event.is_recurring_event, event.recurring_type, is_admin, is_expire, event.event_theme, is_my_event, owner_information, invitation_information)
+        event_information << Event_information.new(event.id, event.event_name, event.start_date, event.end_date, event.latitude, event.longitude, event.address, event.invitees_count, event.accepted_count, event.rejected_count, event.check_in_count, event.is_manual_check_in, img_url, event.description, event.private, event.remainder, event.status, event.owner_id, event.is_recurring_event, event.recurring_type, is_admin, is_expire, event.event_theme, is_my_event,is_accepted, owner_information, invitation_information)
       end
     end
 
@@ -737,5 +740,31 @@ class EventsController < ApplicationController
           end
         end
       end
+
+  def delete_admins_form_events
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    @user = User.find_by_id(127) if !user_access_token.present?
+    @event = Event.find_by_id(params[:event_id]) if params[:event_id].present? && @user.present?
+    @event_admins = EventAdmins.find_by_event_id(@event.id) if @event.present?
+    if @event_admins.present? && @event.present?
+      @event_admin = EventAdmins.find_by_event_id_and_user_id(params[:event_id], @user.id)
+      @event_admin.destroy if @event_admin.present?
+      @invitation = Invitation.find_by_event_id_and_participant_id(params[:event_id], @user.id)
+      @invitation.update_attribute(:is_blocked, true)
+      @event_admins = EventAdmins.find_by_event_id(@event.id) if @event.present?
+      @event.update_attribute(:hide, true) if @event_admins.blank?
+    end
+    if request.format == 'json'
+      if @user.present? && @event.present?
+        render :json => {:status => "successfully removed from this events"}
+      elsif @user.present?
+        render :json => {:status => "please try with proper event and user"}
+      else
+        render :json => {:status => "Invalid Authentication you are not allow to do this action"}
+      end
+    end
+  end
+
+
 
 end

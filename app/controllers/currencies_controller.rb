@@ -80,4 +80,39 @@ class CurrenciesController < ApplicationController
       format.json { head :ok }
     end
   end
+
+  def my_notifications
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    @user = User.find_by_id(user_access_token.user_id) if !user_access_token.present?
+    if @user.present?
+      @notifications = Notification.where("user_id =?", @user.id).order('created_at DESC')
+      count = notifications = Notification.where('user_id =? and notified =?', @user.id, false)
+    end
+    respond_to do |format|
+      if @user.present?
+        format.json { render :json => {:notifications => @notifications, :pending_notifications => count.size} }
+      else
+        format.json { render :json => {:status => "Invalid Authentication you are not allow to do this action"} }
+      end
+    end
+  end
+
+  def clear_notifications
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
+    if @user.present?
+      @notifications = Notification.find_all_by_user_id(@user.id)
+      @notifications.each do |notification|
+        notification.destroy
+      end
+    end
+    respond_to do |format|
+      if @user.present?
+        format.json { render :json => {:status => "clear all"} }
+      else
+        format.json { render :json => {:status => "Invalid Authentication you are not allow to do this action"} }
+      end
+    end
+  end
+
 end

@@ -150,4 +150,26 @@ module ApplicationHelper
     "http://invtapp.cerone-software.com/"
   end
 
+
+  def create_normal_push_notification(user_id, event_id, push_message)
+    notifications = Notification.where('user_id =? and notified =?', user_id, false)
+    notification = Notification.new
+    notification.user_id = user_id
+    notification.order_id = event_id
+    notification.content = push_message
+    notification.notified = false
+    notification.notification_type = "Notification"
+    notification.save
+    user = User.find_by_id(notification.user_id)
+    if user.present? && user.gcm_code.present?
+      registration_ids= [user.gcm_code]
+      gcm = GCM.new('AIzaSyBfBtl4go_-zhG-6o122tN03ob15w_cvOY')
+      if registration_ids.present?
+        options = {data: {message: notification.content, event: notification.event_id, type: notification.notification_type, pending_notifications: notifications.size}, collapse_key: 'updated_score'}
+        response = gcm.send(registration_ids, options)
+      end
+    end
+  end
+
+  alias notification create_normal_push_notification
 end

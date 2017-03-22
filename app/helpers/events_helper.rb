@@ -63,9 +63,9 @@ module EventsHelper
 
 
   class Event_information
-    attr_accessor :id, :event_name, :start_date, :end_date, :latitude, :longitude, :address, :invitees_count, :accepted_count, :rejected_count, :check_in_count, :is_manual_check_in, :image_url, :description, :private, :remainder, :status, :owner_id, :is_recurring_event, :recurring_type, :is_admin, :is_expire, :event_theme,:is_my_event,:owner_information,:invitation_information
+    attr_accessor :id, :event_name, :start_date, :end_date, :latitude, :longitude, :address, :invitees_count, :accepted_count, :rejected_count, :check_in_count, :is_manual_check_in, :image_url, :description, :private, :remainder, :status, :owner_id, :is_recurring_event, :recurring_type, :is_admin, :is_expire, :event_theme,:is_my_event,:is_accepted,:owner_information,:invitation_information
 
-    def initialize(id, event_name, start_date, end_date, latitude, longitude, address, invitees_count, accepted_count, rejected_count, check_in_count, is_manual_check_in, image_url, description, private, remainder, status, owner_id, is_recurring_event, recurring_type, is_admin, is_expire, event_theme,is_my_event,owner_information,invitation_information)
+    def initialize(id, event_name, start_date, end_date, latitude, longitude, address, invitees_count, accepted_count, rejected_count, check_in_count, is_manual_check_in, image_url, description, private, remainder, status, owner_id, is_recurring_event, recurring_type, is_admin, is_expire, event_theme,is_my_event,is_accepted,owner_information,invitation_information)
       @id = id
       @event_name = event_name
       @end_date = end_date
@@ -90,6 +90,7 @@ module EventsHelper
       @is_expire = is_expire
       @event_theme = event_theme
       @is_my_event = is_my_event
+      @is_accepted = is_accepted
       @owner_information = owner_information
       @invitation_information = invitation_information
     end

@@ -1,0 +1,21 @@
+<div class="row">
+  <div class="col-sm-6"><%= get_index_text('Notifications') %></div>
+</div>
+<table class="table table-bordered " align="center">
+  <tr align="center" class="table_style text-center">
+    <th>User</th>
+    <th>Event</th>
+    <th>Notification type</th>
+    <th>Notified</th>
+  </tr>
+
+  <% @notifications.each do |notification| %>
+      <tr>
+        <td><%= notification.user_id %></td>
+        <td><%= notification.event_id %></td>
+        <td><%= notification.notification_type %></td>
+        <td><%= notification.notified %></td>
+      </tr>
+  <% end %>
+</table>
+
