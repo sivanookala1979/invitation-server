@@ -681,7 +681,7 @@ class EventsController < ApplicationController
         invitation_information = []
         @invitations.each do |invitation|
           invitation_details = InvitationDetails.new
-          invitation_details.is_accepted=invitation.is_accepted
+          invitation_details.is_accepted= invitation.is_accepted ? true : false
           user = User.find_by_id(invitation.participant_id)
           user = User.find_by_phone_number(invitation.participant_mobile_number) if user.blank?
           if user.present?
@@ -714,4 +714,28 @@ class EventsController < ApplicationController
     end
 
   end
+
+      def make_invite_as_admin_to_event
+        @user = User.find_by_id(params[:user_id]) if params[:user_id].present?
+        @event = Event.find_by_id(params[:event_id]) if params[:event_id].present?
+        if @user.present? && @event.present?
+          @event_admin = EventAdmins.find_by_event_id_and_user_id(params[:event_id], params[:user_id])
+          if @event_admin.blank?
+            event_admin = EventAdmins.new
+            event_admin.user_id = @user.id
+            event_admin.event_id = @event.id
+            event_admin.save
+          end
+        end
+        if request.format == 'json'
+          if @event_admin.present?
+            render :json => {:status => "all ready he is admin"}
+          elsif event_admin.present?
+            render :json => {:status => "successfully Make as admin "}
+          else
+            render :json => {:status => "please try with proper event and user"}
+          end
+        end
+      end
+
 end
