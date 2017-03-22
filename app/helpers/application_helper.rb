@@ -155,7 +155,7 @@ module ApplicationHelper
     notifications = Notification.where('user_id =? and notified =?', user_id, false)
     notification = Notification.new
     notification.user_id = user_id
-    notification.order_id = event_id
+    notification.event_id = event_id
     notification.content = push_message
     notification.notified = false
     notification.notification_type = "Notification"
