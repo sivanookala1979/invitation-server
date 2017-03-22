@@ -91,7 +91,7 @@ class EventsController < ApplicationController
         event_admins.user_id = new_event.owner_id
         event_admins.save
       end
-      notification(new_event.user_id, new_event.id, "Your event is created with the name #{new_event.event_name}.")
+      notification(new_event.owner_id, new_event.id, "Your event is created with the name #{new_event.event_name}.")
     end
     if request.format == 'json'
       if user_access_token.present?
