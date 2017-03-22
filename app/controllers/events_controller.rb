@@ -658,7 +658,8 @@ class EventsController < ApplicationController
       @my_invitation_events = Invitation.find_all_by_participant_id_and_is_blocked(@user.id,false)
       my_invitation_event_ids = []
       @my_invitation_events.each do |my_invitation|
-        my_invitation_event_ids << my_invitation.event_id if !my_invitation.hide
+        event = Event.find_by_id(my_invitation.event_id)
+        my_invitation_event_ids << my_invitation.event_id if !event.hide
       end
       my_event_ids= []
       @my_events.each do |event|
