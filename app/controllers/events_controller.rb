@@ -743,7 +743,7 @@ class EventsController < ApplicationController
 
   def delete_admins_form_events
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
-    @user = User.find_by_id(127) if !user_access_token.present?
+    @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
     @event = Event.find_by_id(params[:event_id]) if params[:event_id].present? && @user.present?
     @event_admins = EventAdmins.find_by_event_id(@event.id) if @event.present?
     if @event_admins.present? && @event.present?

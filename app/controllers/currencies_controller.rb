@@ -83,7 +83,7 @@ class CurrenciesController < ApplicationController
 
   def my_notifications
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
-    @user = User.find_by_id(user_access_token.user_id) if !user_access_token.present?
+    @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
     if @user.present?
       @notifications = Notification.where("user_id =?", @user.id).order('created_at DESC')
       count = notifications = Notification.where('user_id =? and notified =?', @user.id, false)
