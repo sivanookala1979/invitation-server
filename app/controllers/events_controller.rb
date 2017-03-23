@@ -665,7 +665,7 @@ class EventsController < ApplicationController
 
   def get_all_events_information
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
-    @user = User.find_by_id(user_access_token.user_id) if !user_access_token.present?
+    @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
     if @user.present?
       event_information = []
       @my_events = Event.find_all_by_owner_id_and_hide(@user.id,!true)
