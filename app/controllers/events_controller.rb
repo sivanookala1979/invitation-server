@@ -326,11 +326,13 @@ class EventsController < ApplicationController
           invitation_details.update_attribute(:is_location_provide, true) if params[:permission].present? && params[:permission].eql?("LOCATION")
           invitation_details.update_attribute(:is_distance_provide, true) if params[:permission].present? && params[:permission].eql?("DISTANCE")
           invitation_details.update_attribute(:is_not_share, true) if params[:permission].present? && params[:permission].eql?("NOTHING")
+          notification(event_invitation.owner_id, event_invitation.id, "Mrs/Ms  #{user.user_name} is Accepted your invitation.")
         end
         event_invitation.accepted_count =event_invitation.accepted_count+1
       else
         invitation_details.update_attribute(:is_rejected,true)
         event_invitation.rejected_count = event_invitation.rejected_count+1
+        notification(event_invitation.owner_id, event_invitation.id, "Mrs/Ms  #{user.user_name} is rejected your invitation.")
       end
     end
     event_invitation.save
@@ -528,6 +530,7 @@ class EventsController < ApplicationController
             invitation.event_id = @event.id
             invitation.participant_mobile_number = participant_mobile['mobile_number']
             invitation.save
+            notification(invitation.participant_id, @event.id, "#{User.find_by_id(@event.owner_id).try(:user_name)} sended invitation for his event #{@event.event_name}")
           end
           if participant_mobile["event_admin"].present? && participant_mobile["event_admin"].eql?(true)
             event_admins = EventAdmins.find_by_event_id_and_user_id(@event.id, @user.id)
@@ -570,6 +573,7 @@ class EventsController < ApplicationController
                 invitation.event_id = @event.id
                 invitation.participant_mobile_number = @user.phone_number
                 invitation.save
+                notification(invitation.participant_id, @event.id, "#{User.find_by_id(@event.owner_id).try(:user_name)} sended invitation for his event #{@event.event_name}")
               end
               @event.invitees_count = 0 if @event.invitees_count.blank?
               @event.invitees_count = @event.invitees_count.to_i + 1
@@ -747,6 +751,7 @@ class EventsController < ApplicationController
             event_admin.event_id = @event.id
             event_admin.save
           end
+          notification(params[:user_id], @event.id, "#{@user.user_name} make you as an admin for the event  #{@event.event_name}")
         end
         if request.format == 'json'
           if @event_admin.present?
@@ -771,6 +776,7 @@ class EventsController < ApplicationController
       @invitation.update_attribute(:is_blocked, true)
       @event_admins = EventAdmins.find_by_event_id(@event.id) if @event.present?
       @event.update_attribute(:hide, true) if @event_admins.blank?
+      notification(@event.owner_id, @event.id, "#{@user.user_name} is left from the admin role")
     end
     if request.format == 'json'
       if @user.present? && @event.present?
