@@ -361,43 +361,57 @@ class EventsController < ApplicationController
   end
 
   def event_invitations
-    event = Event.find(params[:id])
-    update_auto_checkIn_status(event)
-    @event_invitation = Invitation.find_all_by_event_id(params[:id])
-    if params[:status].present?
-      if params[:status].eql?('CheckIn')
-        @event_invitation = Invitation.find_all_by_event_id_and_is_check_in(params[:id], params[:status].eql?('CheckIn'))
-      elsif params[:status].eql?('Pending')
-        @event_invitation = Invitation.find_all_by_event_id_and_is_accepted_and_is_check_in(params[:id], true, false)
-      elsif params[:status].eql?('NotGoing')
-        @event_invitation = Invitation.find_all_by_event_id_and_is_accepted(params[:id], false)
-      end
-    end
-    @invitees_size = @event_invitation.size
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
+    event = Event.find(params[:id]) if @user.present?
     invitation_details_list=[]
-    @event_invitation.each do |invitation|
-      invitation_details = InvitationDetails.new
-      invitation_details.is_accepted=invitation.is_accepted
-      user = User.find_by_id(invitation.participant_id)
-      user = User.find_by_phone_number(invitation.participant_mobile_number) if user.blank?
-      if user.present?
-      invitation_details.name=user.user_name
-      invitation_details.mobile=user.phone_number
-      invitation_details.user_id = user.id
-      user_location = UserLocation.where('user_id=?', user.id).last
-      if user_location.present?
-        invitation_details.distance= getDistanceFromLatLonInKm(event.latitude, event.longitude, user_location.latitude, user_location.longitude)
-        invitation_details.update_at=distance_of_time_in_words(user_location.time, Time.now)
+    if event.present?
+      update_auto_checkIn_status(event)
+      @event_admin = EventAdmins.find_by_event_id_and_user_id(event.id,@user.id)
+      if @event_admin.present?
+      @event_invitation = Invitation.find_all_by_event_id(event.id)
+      if params[:status].present?
+        @event_invitation = Invitation.find_all_by_event_id_and_is_check_in(params[:id], params[:status].eql?('CheckIn')) if params[:status].eql?('CheckIn')
+        @event_invitation = Invitation.find_all_by_event_id_and_is_accepted_and_is_check_in(params[:id], true, false) if params[:status].eql?('Pending')
+        @event_invitation = Invitation.find_all_by_event_id_and_is_accepted(params[:id], false) if params[:status].eql?('NotGoing')
       end
-      invitation_details.email = user.email.present? ? user.email : ""
-      invitation_details.img_url = (image = Images.find_by_id(user.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
-      @event_admin = EventAdmins.find_by_event_id_and_user_id(event.id,invitation.participant_id)
-      invitation_details.is_admin = @event_admin.present? ? true : false
-      invitation_details_list<<invitation_details
+      else
+        @event_invitation = Invitation.find_all_by_event_id_and_is_blocked(event.id,false)
+        if params[:status].present?
+          @event_invitation = Invitation.find_all_by_event_id_and_is_check_in_and_is_blocked(params[:id], params[:status].eql?('CheckIn'),false) if params[:status].eql?('CheckIn')
+          @event_invitation = Invitation.find_all_by_event_id_and_is_accepted_and_is_check_in_and_is_blocked(params[:id], true, false,false) if params[:status].eql?('Pending')
+          @event_invitation = Invitation.find_all_by_event_id_and_is_accepted_and_is_blocked(params[:id], false,false) if params[:status].eql?('NotGoing')
+        end
+      end
+      @event_invitation.each do |invitation|
+        invitation_details = InvitationDetails.new
+        invitation_details.is_accepted= invitation.is_accepted ? true : false
+        user = User.find_by_id(invitation.participant_id)
+        user = User.find_by_phone_number(invitation.participant_mobile_number) if user.blank?
+        if user.present?
+          invitation_details.name=user.user_name
+          invitation_details.mobile=user.phone_number
+          invitation_details.user_id = user.id
+          user_location = UserLocation.where('user_id=?', user.id).last
+          if user_location.present?
+            invitation_details.distance= getDistanceFromLatLonInKm(event.latitude, event.longitude, user_location.latitude, user_location.longitude)
+            invitation_details.update_at=distance_of_time_in_words(user_location.time, Time.now)
+          end
+          invitation_details.email = user.email.present? ? user.email : ""
+          invitation_details.img_url = (image = Images.find_by_id(user.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+          @event_admin = EventAdmins.find_by_event_id_and_user_id(event.id, invitation.participant_id)
+          invitation_details.is_admin = @event_admin.present? ? true : false
+          invitation_details.is_blocked = invitation.is_blocked
+          invitation_details_list<<invitation_details
+        end
       end
     end
     if request.format == 'json'
-      render :json => {:participants_list => invitation_details_list}
+      if @user.present?
+        render :json => {:participants_list => invitation_details_list}
+      else
+        render :json => {:status => "Invalid Authentication you are not allow to do this action"}
+      end
     end
   end
 
@@ -651,7 +665,7 @@ class EventsController < ApplicationController
 
   def get_all_events_information
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
-    @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
+    @user = User.find_by_id(user_access_token.user_id) if !user_access_token.present?
     if @user.present?
       event_information = []
       @my_events = Event.find_all_by_owner_id_and_hide(@user.id,!true)
@@ -702,6 +716,7 @@ class EventsController < ApplicationController
             invitation_details.img_url = (image = Images.find_by_id(user.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
             @event_admin = EventAdmins.find_by_event_id_and_user_id(event.id,invitation.participant_id)
             invitation_details.is_admin = @event_admin.present? ? true : false
+            invitation_details.is_blocked = invitation.is_blocked
             invitation_information<<invitation_details
           end
 
