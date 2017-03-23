@@ -767,5 +767,27 @@ class EventsController < ApplicationController
   end
 
 
+  def block_invitations
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    @user = User.find_by_id(127) if !user_access_token.present?
+    @event = Event.find_by_id(params[:event_id]) if params[:event_id].present?
+    if @user.present? && @event.present?
+      @event_admin = EventAdmins.find_by_event_id_and_user_id(@event.id, @user.id)
+      if @event_admin.present?
+        @invitation = Invitation.find_by_event_id_and_participant_id(@event.id,params[:user_id]) if params[:user_id].present?
+        @invitation.update_attribute(:is_blocked,true) if @invitation.present?
+      end
+    end
+
+    if request.format == 'json'
+      if @user.present? && @event.present? && @event_admin.present?
+        render :json => {:status => "successfully blocked"}
+      elsif @user.present?
+        render :json => {:status => "please try with proper event and user"}
+      else
+        render :json => {:status => "Invalid Authentication you are not allow to do this action"}
+      end
+    end
+  end
 
 end
