@@ -669,7 +669,7 @@ class EventsController < ApplicationController
     if @user.present?
       event_information = []
       @my_events = Event.find_all_by_owner_id_and_hide(@user.id,!true)
-      @my_invitation_events = Invitation.find_all_by_participant_id_and_is_blocked(@user.id,false)
+      @my_invitation_events = Invitation.find_all_by_participant_id_and_is_blocked_and_is_accepted(@user.id,false,true)
       my_invitation_event_ids = []
       @my_invitation_events.each do |my_invitation|
         event = Event.find_by_id(my_invitation.event_id)
