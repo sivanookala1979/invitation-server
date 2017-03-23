@@ -681,7 +681,8 @@ class EventsController < ApplicationController
         is_my_event = event.owner_id.eql?(@user.id) ? true : false
         invitation = Invitation.find_by_event_id_and_participant_id(event_id,@user.id)
         is_accepted = is_my_event || (invitation.present? && invitation.is_accepted) ? true : false
-        @invitations = Invitation.find_all_by_event_id(event.id)
+        @invitations = Invitation.find_all_by_event_id(event.id) if is_admin
+        @invitations = Invitation.find_all_by_event_id_and_is_blocked_and_is_accepted(event.id,false,true) if !is_admin
         invitation_information = []
         @invitations.each do |invitation|
           invitation_details = InvitationDetails.new
@@ -769,7 +770,7 @@ class EventsController < ApplicationController
 
   def block_invitations
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
-    @user = User.find_by_id(127) if !user_access_token.present?
+    @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
     @event = Event.find_by_id(params[:event_id]) if params[:event_id].present?
     if @user.present? && @event.present?
       @event_admin = EventAdmins.find_by_event_id_and_user_id(@event.id, @user.id)
