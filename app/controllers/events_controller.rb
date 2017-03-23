@@ -329,6 +329,7 @@ class EventsController < ApplicationController
         end
         event_invitation.accepted_count =event_invitation.accepted_count+1
       else
+        invitation_details.update_attribute(:is_rejected,true)
         event_invitation.rejected_count = event_invitation.rejected_count+1
       end
     end
@@ -669,7 +670,7 @@ class EventsController < ApplicationController
     if @user.present?
       event_information = []
       @my_events = Event.find_all_by_owner_id_and_hide(@user.id,!true)
-      @my_invitation_events = Invitation.find_all_by_participant_id_and_is_blocked_and_is_accepted(@user.id,false,true)
+      @my_invitation_events = Invitation.where("participant_id =? and is_blocked =? and is_rejected =?" ,@user.id,false,false)
       my_invitation_event_ids = []
       @my_invitation_events.each do |my_invitation|
         event = Event.find_by_id(my_invitation.event_id)
