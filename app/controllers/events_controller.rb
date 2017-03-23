@@ -654,7 +654,7 @@ class EventsController < ApplicationController
     @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
     if @user.present?
       event_information = []
-      @my_events = Event.find_all_by_owner_id(@user.id)
+      @my_events = Event.find_all_by_owner_id_and_hide(@user.id,!true)
       @my_invitation_events = Invitation.find_all_by_participant_id_and_is_blocked(@user.id,false)
       my_invitation_event_ids = []
       @my_invitation_events.each do |my_invitation|
