@@ -784,11 +784,11 @@ class EventsController < ApplicationController
     end
     if request.format == 'json'
       if @user.present? && @event.present?
-        render :json => {:status => "successfully removed from this events"}
+        render :json => {:status => "successfully removed from this events",:is_success => true}
       elsif @user.present?
-        render :json => {:status => "please try with proper event and user"}
+        render :json => {:status => "please try with proper event and user", :is_success => false}
       else
-        render :json => {:status => "Invalid Authentication you are not allow to do this action"}
+        render :json => {:status => "Invalid Authentication you are not allow to do this action",:is_success => false}
       end
     end
   end
@@ -808,11 +808,11 @@ class EventsController < ApplicationController
 
     if request.format == 'json'
       if @user.present? && @event.present? && @event_admin.present?
-        render :json => {:status => "successfully blocked"}
+        render :json => {:status => "successfully blocked",:is_success => true}
       elsif @user.present?
-        render :json => {:status => "please try with proper event and user"}
+        render :json => {:status => "please try with proper event and user",:is_success => false}
       else
-        render :json => {:status => "Invalid Authentication you are not allow to do this action"}
+        render :json => {:status => "Invalid Authentication you are not allow to do this action",:is_success => false}
       end
     end
   end
