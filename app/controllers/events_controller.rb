@@ -741,22 +741,26 @@ class EventsController < ApplicationController
   end
 
       def make_invite_as_admin_to_event
+        user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+        @current_user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
+        if @current_user.present?
         @user = User.find_by_id(params[:user_id]) if params[:user_id].present?
         @event = Event.find_by_id(params[:event_id]) if params[:event_id].present?
         if @user.present? && @event.present?
-          @event_admin = EventAdmins.find_by_event_id_and_user_id(params[:event_id], params[:user_id])
+          @event_admin = EventAdmins.find_by_event_id_and_user_id(@event.id, @user.id)
           if @event_admin.blank?
             event_admin = EventAdmins.new
             event_admin.user_id = @user.id
             event_admin.event_id = @event.id
             event_admin.save
           end
-          notification(params[:user_id], @event.id, "#{@user.user_name} make you as an admin for the event  #{@event.event_name}")
+          notification(@user.id, @event.id, "#{@current_user.user_name} make you as an admin for the event  #{@event.event_name}")
+        end
         end
         if request.format == 'json'
-          if @event_admin.present?
+          if @current_user.present? && @event_admin.present?
             render :json => {:status => "all ready he is admin"}
-          elsif event_admin.present?
+          elsif @current_user.present? && event_admin.present?
             render :json => {:status => "successfully Make as admin "}
           else
             render :json => {:status => "please try with proper event and user"}
