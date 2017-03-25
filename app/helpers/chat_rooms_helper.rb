@@ -4,15 +4,16 @@ module ChatRoomsHelper
   end
 
   class ChatSms
-    attr_accessor :chat_room_id, :from_id, :user_name, :message, :created_at, :updated_at
+    attr_accessor :chat_room_id, :from_id, :user_name, :message, :created_at, :updated_at,:image
 
-    def initialize(chat_room_id, from_id, user_name, message, created_at, updated_at)
+    def initialize(chat_room_id, from_id, user_name, message, created_at, updated_at,image)
       @chat_room_id = chat_room_id
       @from_id = from_id
       @user_name = user_name
       @message= message
       @created_at = created_at
       @updated_at = updated_at
+      @image = image
     end
   end
 

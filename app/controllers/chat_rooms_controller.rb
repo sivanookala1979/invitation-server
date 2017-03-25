@@ -98,7 +98,8 @@ class ChatRoomsController < ApplicationController
       @inter_messages = []
        @messages.each do |message|
         user = User.find_by_id(message.from_id)
-        @inter_messages << ChatSms.new(message.chat_room_id,message.from_id,user.user_name,message.message,message.created_at,get_time_format_app(message.updated_at))
+        img_url = (image = Images.find_by_id(user.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+        @inter_messages << ChatSms.new(message.chat_room_id,message.from_id,user.user_name,message.message,message.created_at,get_time_format_app(message.updated_at),img_url)
        end
     respond_to do |format|
       format.json { render json: @inter_messages }
