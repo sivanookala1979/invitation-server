@@ -54,7 +54,7 @@ InvtappServer::Application.routes.draw do
     get :make_invite_as_admin_to_event, :on => :collection
     get :delete_admins_form_events, :on => :collection
     get :block_invitations, :on => :collection
-    get :check_contacts, :on => :collection
+    post :check_contacts, :on => :collection
   end
 
   resources :users do
