@@ -121,4 +121,19 @@ module EventsHelper
     end
   end
 
+
+  class EventInvitations
+    attr_accessor :name, :mobile, :email, :user_id, :img_url, :distance, :update_at, :is_admin
+    def initialize(name, mobile, email, user_id, img_url, distance, update_at, is_admin)
+      @name = name
+      @mobile = mobile
+      @email = email
+      @user_id = user_id
+      @img_url = img_url
+      @distance = distance
+      @update_at = update_at
+      @is_admin =is_admin
+    end
+  end
+
 end

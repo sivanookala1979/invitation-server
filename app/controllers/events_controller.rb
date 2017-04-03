@@ -841,4 +841,69 @@ class EventsController < ApplicationController
     end
   end
 
+
+  def differentiate_invitees
+    @event = Event.find_by_id(params[:event_id])
+    differentiated_invitees_with_time =[]
+    below_10_min = []
+    below_10_min_count = 0
+    below_30_min = []
+    below_30_mins_count = 0
+    below_60_min = []
+    below_60_min_count = 0
+    above_60_min = []
+    above_60_min_count = 0
+
+    if @event.present?
+      invitations = Invitation.where("event_id =? and is_accepted=? and is_blocked=? and is_rejected=?", @event.id, true, false, false)
+      invitations.each do |invitation|
+        user = User.find_by_id(invitation.participant_id)
+        if user.present?
+          user_name = user.user_name.present? ? user.user_name : ''
+          mobile_number = user.phone_number.present? ? user.phone_number : ''
+          email = user.email.present? ? user.email : ''
+          img_url = (image = Images.find_by_id(user.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+          user_location = UserLocation.where('user_id=?', invitation.participant_id).last
+          distance =""
+          update_at=""
+          reaching_time = 0
+          if user_location.present?
+            distance= getDistanceFromLatLonInKm(@event.latitude, @event.longitude, user_location.latitude, user_location.longitude)
+            update_at=distance_of_time_in_words(user_location.time, Time.now)
+            response =HTTParty.get("https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=#{@event.latitude},#{@event.longitude}&destinations=#{user_location.latitude},#{user_location.longitude}&sensor=false")
+            rows = response['rows'] if response.present?
+            if rows.present?
+              rows.each do |row|
+                row['elements'].each do |element|
+                  reaching_time = element['duration']['value'] if element['duration']['value'].present?
+                end
+              end
+            end
+          end
+          @event_admin = EventAdmins.find_by_event_id_and_user_id(@event.id, invitation.participant_id)
+          is_admin = @event_admin.present? ? true : false
+        end
+
+        if (reaching_time > 3600) || reaching_time == 0
+          above_60_min_count= above_60_min_count + 1
+          above_60_min << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
+        elsif reaching_time < 3600 && reaching_time > 1800
+          below_60_min_count = below_60_min_count + 1
+          below_60_min  << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
+        elsif reaching_time < 1800 && reaching_time > 600
+          below_30_mins_count = below_30_mins_count + 1
+          below_30_min << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
+        elsif  reaching_time < 600 && reaching_time > 0
+          below_10_min_count = below_10_min_count+1
+          below_10_min << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
+        end
+      end
+    end
+
+
+    respond_to do |format|
+      format.json { render :json => {:above_60_min => above_60_min,:above_60_min_count => above_60_min_count,:below_60_min =>below_60_min,:below_60_min_count =>below_60_min_count,:below_30_min => below_30_min,:below_30_mins_count=>below_30_mins_count,:below_10_min => below_10_min,:below_10_min_count =>below_10_min_count} }
+    end
+  end
+
 end
