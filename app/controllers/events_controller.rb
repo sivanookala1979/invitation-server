@@ -822,15 +822,13 @@ class EventsController < ApplicationController
     contacts_details =[]
     if my_contacts.present?
       my_contacts.each do |my_contact|
-        user = User.where("phone_number =? and is_app_login =? ", my_contact['mobile_number'], true)
-        is_active_user = false
-        user_email = " "
-        img_url = ''
-        if user.present?
-          user_email = user.email if user.email.present?
-          is_active_user = true
-          img_url = (image = Images.find_by_id(user.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : '' if user.image_id.present?
-        end
+        @user = User.find_by_phone_number_and_is_app_login(my_contact['mobile_number'],true)
+        is_active_user = @user.present? ? true : false
+        user_email = @user.present? && @user.email.present? ? @user.email : ""
+        img_url = " "
+        if @user.present? && @user.image_id.present?
+        img_url = (image = Images.find_by_id(@user.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+          end
         contacts_details << ContactsDetails.new(my_contact['user_name'], my_contact['mobile_number'], is_active_user,user_email, img_url)
       end
     end
