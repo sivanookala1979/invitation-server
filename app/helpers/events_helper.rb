@@ -1,7 +1,18 @@
 module EventsHelper
 
   class InvitationDetails
-    attr_accessor :name,:user_id, :mobile, :is_accepted, :distance, :update_at,:email,:img_url,:is_admin,:is_blocked
+    attr_accessor :name, :user_id, :mobile, :is_accepted, :distance, :update_at, :email, :img_url, :is_admin, :is_blocked
+  end
+
+  class ContactsDetails
+    attr_accessor :name, :mobile_number, :is_active_user, :email, :img_url
+    def initialize(name, mobile_number, is_active_user, email, img_url)
+      @name = name
+      @mobile_number = mobile_number
+      @is_active_user = is_active_user
+      @email = email
+      @img_url = img_url
+    end
   end
 
   class EventDetails

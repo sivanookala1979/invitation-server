@@ -107,9 +107,8 @@ class ChatRoomsController < ApplicationController
   end
 
   def post_inter_chat_message
-      is_group= false
-      is_group = params[:is_group]  if params[:is_group].present?
-
+    is_group= false
+    is_group = params[:is_group] if params[:is_group].present?
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
     ensure_inter_chat_room(@user.id, params[:other_id], is_group) if !is_group
@@ -119,23 +118,21 @@ class ChatRoomsController < ApplicationController
     @message.message = params[:message]
     @message.event_id = params[:other_id] if is_group
     @message.save!
-      status = @message.present? ? true : false
+    status = @message.present? ? true : false
 
-      if is_group
-        @event = Event.find_by_id(params[:other_id])
-        if @event.present?
-          @invitations = Invitation.where("event_id =? and is_accepted =?", @event.id, true)
-          @invitations.each do |invitation|
-              if (invitation.participant_id.to_i != @user.id)
-              post_gcm_message(@message.message,invitation.participant_id, @user.id, @user.user_name, '', "Chat", true, @event.event_name, @event.id)
-                end
-          end
-        else
-          status=false
+    if is_group
+      @event = Event.find_by_id(params[:other_id])
+      if @event.present?
+        @invitations = Invitation.where("event_id =? and is_accepted =? and participant_id !=", @event.id, true,@user.id)
+        @invitations.each do |invitation|
+            post_gcm_message(@message.message, invitation.participant_id, @user.id, @user.user_name, '', "Chat", true, @event.event_name, @event.id)
         end
       else
-        post_gcm_message(@message.message, params[:other_id], @user.id, @user.user_name, '', "Chat", false, "", "")
+        status=false
       end
+    else
+      post_gcm_message(@message.message, params[:other_id], @user.id, @user.user_name, '', "Chat", false, "", "")
+    end
     respond_to do |format|
       format.json { render :json => {:status => status} }
     end
@@ -230,12 +227,15 @@ class ChatRoomsController < ApplicationController
 
   def post_gcm_message(content, to_user_id, from_user_id,user_name, image_url, notification_type,is_group,event_name,event_id)
     user = User.find_by_id(to_user_id)
+    from_user = User.find_by_id(from_user_id)
+    picture = Images.find_by_id(user.image_id) if from_user.present? && from_user.image_id.present?
+    sender_image_url = picture.present? ? root_url+"#{picture.image_path.url(:small)}" : ''
     @error_message = nil
     if user.present? && user.gcm_code.present?
       gcm = GCM.new('AIzaSyBfBtl4go_-zhG-6o122tN03ob15w_cvOY')
       registration_ids= [user.gcm_code]
       response = nil
-        options = {data: {message: content, title: notification_type,from_user_id: from_user_id,from_user_name:user_name, is_group: is_group,event_name:event_name,event_id:event_id}, collapse_key: 'updated_score'}
+        options = {data: {message: content, title: notification_type,from_user_id: from_user_id,from_user_name:user_name, is_group: is_group,event_name:event_name,event_id:event_id,sender_image:sender_image_url}, collapse_key: 'updated_score'}
         response = gcm.send(registration_ids, options)
         gcm_results = JSON.parse(response[:body])['results'][0]
         @error_message = gcm_results['error']
