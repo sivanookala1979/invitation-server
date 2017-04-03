@@ -823,17 +823,17 @@ class EventsController < ApplicationController
     if my_contacts.present?
       my_contacts.each do |my_contact|
         user = User.where("phone_number =? and is_app_login =? ", my_contact['mobile_number'], true)
-        is_active_user = user.present? ? true : false
-        email = user.present? && user.email.present? ? user.email : " "
-        if user.present? && user.image_id.present?
-          img_url = (image = Images.find_by_id(user.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
-        else
-          img_url = ''
+        is_active_user = false
+        email = " "
+        img_url = ''
+        if user.present?
+          email = user.email if user.email.present?
+          is_active_user = true
+          img_url = (image = Images.find_by_id(user.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : '' if user.image_id.present?
         end
         contacts_details << ContactsDetails.new(my_contact['user_name'], my_contact['mobile_number'], is_active_user, email, img_url)
       end
     end
-
     respond_to do |format|
       if params[:my_contacts].present?
         format.json { render :json => {:contacts_details => contacts_details} }
