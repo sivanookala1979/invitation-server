@@ -844,17 +844,26 @@ class EventsController < ApplicationController
 
   def differentiate_invitees
     @event = Event.find_by_id(params[:event_id])
-    differentiated_invitees_with_time =[]
-    below_10_min = []
-    below_10_min_count = 0
-    below_30_min = []
-    below_30_mins_count = 0
-    below_60_min = []
-    below_60_min_count = 0
-    above_60_min = []
-    above_60_min_count = 0
-
+    event_all_invitees=[]
     if @event.present?
+
+      below_10_min_invitees_details = EventInviteesDetails.new
+      below_10_min_invitees_details.title='With in 10 Min'
+      below_10_min_invitees_details.invitees_list=[]
+
+      below_30_min_invitees_details = EventInviteesDetails.new
+      below_30_min_invitees_details.title='With in 30 Min'
+      below_30_min_invitees_details.invitees_list=[]
+
+      below_60_min_invitees_details = EventInviteesDetails.new
+      below_60_min_invitees_details.title='With in 1 Hour'
+      below_60_min_invitees_details.invitees_list=[]
+
+      above_60_min_invitees_details = EventInviteesDetails.new
+      above_60_min_invitees_details.title='Above 1 Hour'
+      above_60_min_invitees_details.invitees_list=[]
+
+
       invitations = Invitation.where("event_id =? and is_accepted=? and is_blocked=? and is_rejected=?", @event.id, true, false, false)
       invitations.each do |invitation|
         user = User.find_by_id(invitation.participant_id)
@@ -885,24 +894,30 @@ class EventsController < ApplicationController
         end
 
         if (reaching_time > 3600) || reaching_time == 0
-          above_60_min_count= above_60_min_count + 1
-          above_60_min << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
+          above_60_min_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
         elsif reaching_time < 3600 && reaching_time > 1800
-          below_60_min_count = below_60_min_count + 1
-          below_60_min  << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
+          below_60_min_invitees_details.invitees_list  << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
         elsif reaching_time < 1800 && reaching_time > 600
-          below_30_mins_count = below_30_mins_count + 1
-          below_30_min << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
+          below_30_min_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
         elsif  reaching_time < 600 && reaching_time > 0
-          below_10_min_count = below_10_min_count+1
-          below_10_min << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
+          below_10_min_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
         end
       end
+
+      below_10_min_invitees_details.total_invitees = below_10_min_invitees_details.invitees_list.size
+      below_30_min_invitees_details.total_invitees = below_30_min_invitees_details.invitees_list.size
+      below_60_min_invitees_details.total_invitees = below_60_min_invitees_details.invitees_list.size
+      above_60_min_invitees_details.total_invitees = above_60_min_invitees_details.invitees_list.size
+
+      event_all_invitees << below_10_min_invitees_details
+      event_all_invitees << below_30_min_invitees_details
+      event_all_invitees << below_60_min_invitees_details
+      event_all_invitees << above_60_min_invitees_details
     end
 
 
     respond_to do |format|
-      format.json { render :json => {:above_60_min => above_60_min,:above_60_min_count => above_60_min_count,:below_60_min =>below_60_min,:below_60_min_count =>below_60_min_count,:below_30_min => below_30_min,:below_30_mins_count=>below_30_mins_count,:below_10_min => below_10_min,:below_10_min_count =>below_10_min_count} }
+      format.json { render :json => {:all_invitees_list => event_all_invitees} }
     end
   end
 

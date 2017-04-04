@@ -136,4 +136,8 @@ module EventsHelper
     end
   end
 
+  class EventInviteesDetails
+    attr_accessor :title, :invitees_list, :total_invitees
+  end
+
 end
