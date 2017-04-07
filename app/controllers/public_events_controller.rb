@@ -1,6 +1,7 @@
 class PublicEventsController < ApplicationController
   # GET /public_events
   # GET /public_events.json
+  include PublicEventsHelper
   include ApplicationHelper
   def index
     @public_events = PublicEvent.all
@@ -88,6 +89,21 @@ class PublicEventsController < ApplicationController
     respond_to do |format|
       format.html { redirect_to public_events_url }
       format.json { head :ok }
+    end
+  end
+
+
+  def get_public_events
+    public_events = PublicEvent.where('is_active =?', true).order('created_at ASC')
+    @public_events = []
+    public_events.each do |event|
+      city = City.find_by_id(event.city_id).try(:name)
+      service = Service.find_by_id(event.service_id).try(:name)
+      img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+      @public_events << PublicEventsList.new(event.id,event.event_name,event.event_theme,event.start_time,event.end_time,event.entry_fee,event.description,event.address,event.is_weekend,city,service,img_url)
+    end
+    respond_to do |format|
+      format.json { render :json => {:public_events => @public_events} }
     end
   end
 
