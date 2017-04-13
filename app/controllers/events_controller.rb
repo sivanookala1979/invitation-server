@@ -78,7 +78,7 @@ class EventsController < ApplicationController
       new_event.hide=false
       new_event.check_in_count = 0
       new_event.status= "Created" if params[:event_id].blank?
-      new_event.owner_id = user.id
+      new_event.owner_id = user.id if params[:event_id].blank?
       if params[:image].present?
         image = save_image(params[:image])
         new_event.update_attribute(:image_id, image.id) if image.present?
@@ -91,7 +91,12 @@ class EventsController < ApplicationController
         event_admins.user_id = new_event.owner_id
         event_admins.save
       end
-      notification(new_event.owner_id, new_event.id, "Your event is created with the name #{new_event.event_name}.")
+      if params[:event_id].blank?
+        notification(new_event.owner_id, new_event.id, "Your event is created with the name #{new_event.event_name}.")
+      else
+        notification(user.id, new_event.id, "Your are edited the event with the name #{new_event.event_name}.")
+        notification(new_event.owner_id, new_event.id, "#{user.user_name} Is edited  Your event with the name #{new_event.event_name}.")
+      end
     end
     if request.format == 'json'
       if user_access_token.present?
