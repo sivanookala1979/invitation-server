@@ -1,0 +1,28 @@
+<%= get_index_text("All User Locations") %>
+<div class="row">
+  <div class="col-sm-12">
+    <table class="table table-bordered">
+      <tr class="table_style">
+        <th>Id</th>
+
+        <th>User Name</th>
+        <th>Mobile Number</th>
+        <th>Latitude</th>
+        <th>Longitude</th>
+        <th>Created At</th>
+      </tr>
+
+      <% @user_locations.each do |user_location| %>
+          <tr>
+            <td><%= user_location.id%></td>
+            <td><%= user_location.user_name %></td>
+            <td><%= user_location.user_mobile_number %></td>
+            <td><%= user_location.latitude %></td>
+            <td><%= user_location.longitude %></td>
+            <td><%= user_location.created_at %></td>
+          </tr>
+      <% end %>
+    </table>
+  </div>
+</div>
+
