@@ -179,4 +179,19 @@ class UsersController < ApplicationController
     end
   end
 
+  def all_user_locations
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
+    @user_locations = UserLocation.where("user_id=?",user.id).order('created_at DESC') if user.present?
+    respond_to do |format|
+      if user.present?
+        format.json { render :json => {:user_locations => @user_locations} }
+      else
+        format.json { render :json => {:status => "Invalid Authentication you are not allow to do this action"} }
+      end
+    end
+  end
+
+
+
 end

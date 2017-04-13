@@ -66,6 +66,7 @@ InvtappServer::Application.routes.draw do
     get :get_user_details, :on => :collection
     post :update_user_details,:on => :collection
     get :store_gcm_code, :on => :collection
+    get :all_user_locations, :on => :collection
   end
 
 
