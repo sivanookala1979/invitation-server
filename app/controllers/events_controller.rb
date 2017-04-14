@@ -853,19 +853,19 @@ class EventsController < ApplicationController
     if @event.present?
 
       below_10_min_invitees_details = EventInviteesDetails.new
-      below_10_min_invitees_details.title='With in 10 Min'
+      below_10_min_invitees_details.title='5-10 Min'
       below_10_min_invitees_details.invitees_list=[]
 
       below_30_min_invitees_details = EventInviteesDetails.new
-      below_30_min_invitees_details.title='With in 30 Min'
+      below_30_min_invitees_details.title='10-20 Min'
       below_30_min_invitees_details.invitees_list=[]
 
       below_60_min_invitees_details = EventInviteesDetails.new
-      below_60_min_invitees_details.title='With in 1 Hour'
+      below_60_min_invitees_details.title='20-30 Min'
       below_60_min_invitees_details.invitees_list=[]
 
       above_60_min_invitees_details = EventInviteesDetails.new
-      above_60_min_invitees_details.title='Above 1 Hour'
+      above_60_min_invitees_details.title='Accepted'
       above_60_min_invitees_details.invitees_list=[]
 
 
@@ -889,7 +889,9 @@ class EventsController < ApplicationController
             if rows.present?
               rows.each do |row|
                 row['elements'].each do |element|
-                  reaching_time = element['duration']['value'] if element['duration']['value'].present?
+                  if element['status'].blank?
+                    reaching_time = element['duration']['value'] if element['duration']['value'].present?
+                  end
                 end
               end
             end
