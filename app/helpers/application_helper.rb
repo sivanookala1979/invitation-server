@@ -161,16 +161,11 @@ module ApplicationHelper
     notification.notification_type = "Notification"
     notification.save
     user = User.find_by_id(notification.user_id)
-    @error_message = nil
     if user.present? && user.gcm_code.present?
       gcm = GCM.new('AIzaSyBfBtl4go_-zhG-6o122tN03ob15w_cvOY')
       registration_ids= [user.gcm_code]
-      response = nil
-      options = {data: {message: notification.content, title: notification.notification_type,event_id:notification.event_id}, collapse_key: 'updated_score'}
+      options = {data: {message: notification.content, title: notification.notification_type, event_id: notification.event_id}, collapse_key: 'updated_score'}
       response = gcm.send(registration_ids, options)
-      gcm_results = JSON.parse(response[:body])['results'][0]
-      @error_message = gcm_results['error']
-      @error_message ||= 'Successfully posted.'
     end
   end
 
