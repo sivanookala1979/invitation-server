@@ -851,7 +851,8 @@ class EventsController < ApplicationController
     @event = Event.find_by_id(params[:event_id])
     event_all_invitees=[]
     if @event.present?
-
+      invitations = Invitation.where("event_id =? and is_accepted=? and is_blocked=? and is_rejected=?", @event.id, true, false, false)
+      if invitations.size > 0
       below_10_min_invitees_details = EventInviteesDetails.new
       below_10_min_invitees_details.title='5-10 Min'
       below_10_min_invitees_details.invitees_list=[]
@@ -867,9 +868,6 @@ class EventsController < ApplicationController
       above_60_min_invitees_details = EventInviteesDetails.new
       above_60_min_invitees_details.title='Accepted'
       above_60_min_invitees_details.invitees_list=[]
-
-
-      invitations = Invitation.where("event_id =? and is_accepted=? and is_blocked=? and is_rejected=?", @event.id, true, false, false)
       invitations.each do |invitation|
         user = User.find_by_id(invitation.participant_id)
         if user.present?
@@ -910,7 +908,6 @@ class EventsController < ApplicationController
           below_10_min_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
         end
       end
-
       below_10_min_invitees_details.total_invitees = below_10_min_invitees_details.invitees_list.size
       below_30_min_invitees_details.total_invitees = below_30_min_invitees_details.invitees_list.size
       below_60_min_invitees_details.total_invitees = below_60_min_invitees_details.invitees_list.size
@@ -921,8 +918,7 @@ class EventsController < ApplicationController
       event_all_invitees << below_60_min_invitees_details
       event_all_invitees << above_60_min_invitees_details
     end
-
-
+    end
     respond_to do |format|
       format.json { render :json => {:all_invitees_list => event_all_invitees} }
     end
