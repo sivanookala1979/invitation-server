@@ -84,6 +84,15 @@ class EventsController < ApplicationController
         new_event.update_attribute(:image_id, image.id) if image.present?
       end
       new_event.save
+      invitation = Invitation.find_by_event_id_and_participant_id(new_event.id,new_event.owner_id)
+      if invitation.blank?
+        invitation = Invitation.new
+        invitation.participant_id = new_event.owner_id
+        invitation.event_id = new_event.id
+        invitation.is_accepted = true
+        invitation.participant_mobile_number = user.phone_number
+        invitation.save
+      end
       event_admin = EventAdmins.find_by_user_id_and_event_id(new_event.owner_id, new_event.id)
       if event_admin.blank?
         event_admins = EventAdmins.new
@@ -683,7 +692,7 @@ class EventsController < ApplicationController
       my_invitation_event_ids = []
       @my_invitation_events.each do |my_invitation|
         event = Event.find_by_id(my_invitation.event_id)
-        my_invitation_event_ids << my_invitation.event_id if !event.hide
+        my_invitation_event_ids << my_invitation.event_id if !event.hide && !event.owner_id.eql?(my_invitation.participant_id)
       end
       my_event_ids= []
       @my_events.each do |event|
