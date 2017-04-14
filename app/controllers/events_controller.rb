@@ -464,7 +464,6 @@ class EventsController < ApplicationController
       user_location = UserLocation.where('user_id=?', invitation.participant_id).last
       @event_user_locations << user_location if user_location.present?
     end
-
   end
 
   # DELETE /events/1
@@ -896,7 +895,7 @@ class EventsController < ApplicationController
             if rows.present?
               rows.each do |row|
                 row['elements'].each do |element|
-                  if element['status'].blank?
+                  if (element['status'].present? && element['status'].eql?("OK"))
                     reaching_time = element['duration']['value'] if element['duration']['value'].present?
                   end
                 end
