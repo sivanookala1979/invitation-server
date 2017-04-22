@@ -3,7 +3,7 @@ InvtappServer::Application.routes.draw do
 
   resources :public_events do
     get :get_public_events, :on => :collection
-    get :add_favorites, :on => :collection
+    get :add_favourite_event, :on => :collection
     get :my_city_favourites, :on => :collection
   end
   resources :cities do
