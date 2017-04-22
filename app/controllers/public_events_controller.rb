@@ -133,13 +133,16 @@ class PublicEventsController < ApplicationController
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
     if user.present? && params[:city_id].present?
-      favourites = Favourites.where('user_id =? and city_id =? and is_active =?', user.id,params[:city_id],true)
+      favourites = Favourites.where('user_id =? and city_id =?', user.id, params[:city_id])
       @favourite_events = []
-      favourites.each do |event|
-        city = City.find_by_id(event.city_id).try(:name)
-        service = Service.find_by_id(event.service_id).try(:name)
-        img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
-        @favourite_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url)
+      favourites.each do |favourite|
+        event = PublicEvent.find_by_id(favourite.event_id)
+        if event.present?
+          city = City.find_by_id(event.city_id).try(:name)
+          service = Service.find_by_id(event.service_id).try(:name)
+          img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+          @favourite_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url)
+        end
       end
     end
     respond_to do |format|
