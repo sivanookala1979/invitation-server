@@ -110,7 +110,7 @@ class PublicEventsController < ApplicationController
   def add_favourite_event
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
-    public_event = PublicEvent.find_by_id_id(params[:public_event_id]) if params[:public_event_id].present?
+    public_event = PublicEvent.find_by_id(params[:public_event_id]) if params[:public_event_id].present?
     city = City.find_by_id(params[:city_id]) if params[:city_id].present?
     if user.present? && public_event.present? && city.present?
       @favourite = Favourites.new
