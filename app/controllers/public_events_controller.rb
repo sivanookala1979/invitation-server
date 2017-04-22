@@ -133,7 +133,7 @@ class PublicEventsController < ApplicationController
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
     if user.present? && params[:city_id].present?
-      favourites = Favourites.where('user_id =? and city_id =? and is_active =?', user.id.params[:city_id],true)
+      favourites = Favourites.where('user_id =? and city_id =? and is_active =?', user.id,params[:city_id],true)
       @favourite_events = []
       favourites.each do |event|
         city = City.find_by_id(event.city_id).try(:name)
