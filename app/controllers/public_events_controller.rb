@@ -133,7 +133,7 @@ class PublicEventsController < ApplicationController
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
     if user.present? && params[:city_id].present?
-      favourites = Favourites.where('user_id =? and city_id =?', user.id.params[:city_id])
+      favourites = Favourites.where('user_id =? and city_id =? and is_active =?', user.id.params[:city_id],true)
       @favourite_events = []
       favourites.each do |event|
         city = City.find_by_id(event.city_id).try(:name)
@@ -144,10 +144,42 @@ class PublicEventsController < ApplicationController
     end
     respond_to do |format|
       if user.present?
-        format.json { render :json => {:public_events => @favourite_events} }
+        format.json { render :json => {:favourite_events => @favourite_events} }
       else
         format.json { render :json => {:error_message => "Invalid Authentication you are not allow to do this action"} }
       end
+    end
+  end
+
+  def free_public_events
+    public_events = PublicEvent.where('is_active =? and entry_fee=? and city_id=?', true, 0.0, params[:city_id]) if params[:city_id].present?
+    @free_events = []
+    if public_events.present?
+      public_events.each do |event|
+        city = City.find_by_id(event.city_id).try(:name)
+        service = Service.find_by_id(event.service_id).try(:name)
+        img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+        @free_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url)
+      end
+    end
+    respond_to do |format|
+      format.json { render :json => {:free_events => @free_events} }
+    end
+  end
+
+  def weekend_public_events
+    public_events = PublicEvent.where('is_active =? and is_weekend=? and city_id=?', true, true, params[:city_id]) if params[:city_id].present?
+    @weekend_events = []
+    if public_events.present?
+      public_events.each do |event|
+        city = City.find_by_id(event.city_id).try(:name)
+        service = Service.find_by_id(event.service_id).try(:name)
+        img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+        @weekend_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url)
+      end
+    end
+    respond_to do |format|
+      format.json { render :json => {:weekend_events => @weekend_events} }
     end
   end
 
