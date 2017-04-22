@@ -107,4 +107,48 @@ class PublicEventsController < ApplicationController
     end
   end
 
+  def add_favourites
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
+    public_event = PublicEvent.find_by_id_id(params[:public_event_id]) if params[:public_event_id].present?
+    city = City.find_by_id(params[:city_id]) if params[:city_id].present?
+    if user.present? && public_event.present? && city.present?
+      @favourite = Favourites.new
+      @favourite.user_id = user.id
+      @favourite.city_id = city.id
+      @favourite.event_id = public_event.id
+      @favourite.save
+    end
+
+    respond_to do |format|
+      if @favourite.present?
+        format.json { render :json => {:status => "successfully  added"} }
+      else
+        format.json { render :json => {:error_message => "Please try again."} }
+      end
+    end
+  end
+
+  def my_city_favourites
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
+    if user.present? && params[:city_id].present?
+      favourites = Favourites.where('user_id =? and city_id =?', user.id.params[:city_id])
+      @favourite_events = []
+      favourites.each do |event|
+        city = City.find_by_id(event.city_id).try(:name)
+        service = Service.find_by_id(event.service_id).try(:name)
+        img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+        @favourite_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url)
+      end
+    end
+    respond_to do |format|
+      if user.present?
+        format.json { render :json => {:public_events => @favourite_events} }
+      else
+        format.json { render :json => {:error_message => "Invalid Authentication you are not allow to do this action"} }
+      end
+    end
+  end
+
 end
