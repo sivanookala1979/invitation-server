@@ -937,7 +937,7 @@ class EventsController < ApplicationController
           end
         end
 
-        at_the_venue_invitees_details.total_invitees = below_10_min_invitees_details.invitees_list.size
+        at_the_venue_invitees_details.total_invitees = at_the_venue_invitees_details.invitees_list.size
         below_10_min_invitees_details.total_invitees = below_10_min_invitees_details.invitees_list.size
         below_30_min_invitees_details.total_invitees = below_30_min_invitees_details.invitees_list.size
         below_60_min_invitees_details.total_invitees = below_60_min_invitees_details.invitees_list.size
