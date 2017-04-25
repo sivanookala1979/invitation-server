@@ -148,7 +148,7 @@ class PublicEventsController < ApplicationController
           service = Service.find_by_id(event.service_id).try(:name)
           img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
           is_favourite = user.present? && (fav = Favourites.find_by_event_id_and_user_id(event.id,user.id)).present? ? true : false
-          @favourite_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url,is_favourit)
+          @favourite_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url,is_favourite)
         end
       end
     end
@@ -164,6 +164,7 @@ class PublicEventsController < ApplicationController
   def free_public_events
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
+
     public_events = PublicEvent.where('is_active =? and entry_fee=? and city_id=?', true, 0.0, params[:city_id]) if params[:city_id].present?
     @free_events = []
     if public_events.present?
@@ -171,11 +172,7 @@ class PublicEventsController < ApplicationController
         city = City.find_by_id(event.city_id).try(:name)
         service = Service.find_by_id(event.service_id).try(:name)
         img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
-        my_favourite = Favourites.find_by_event_id_and_user_id(event.id, user.id) if user.present?
-        is_favourite = false
-        if user.present? && my_favourite
-          is_favourite = true
-        end
+        is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id,user.id)).present? ? true : false
         @free_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url,is_favourite)
       end
     end
