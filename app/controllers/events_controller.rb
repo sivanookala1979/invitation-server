@@ -866,7 +866,7 @@ class EventsController < ApplicationController
     @event = Event.find_by_id(params[:event_id])
     event_all_invitees=[]
     if @event.present?
-      invitations = Invitation.where("event_id =? and is_accepted=? and is_blocked=? and is_rejected =? and participant_id=?", @event.id, true, false, false,!@event.owner_id)
+      invitations = Invitation.where("event_id =? and is_accepted=? and is_blocked=? and is_rejected =?", @event.id, true, false, false)
       if invitations.size > 0
 
         at_the_venue_invitees_details = EventInviteesDetails.new
@@ -895,7 +895,7 @@ class EventsController < ApplicationController
 
         invitations.each do |invitation|
           user = User.find_by_id(invitation.participant_id)
-          if user.present?
+          if user.present? && !(user.id.eql?(@event.owner_id))
             user_name = user.user_name.present? ? user.user_name : ''
             mobile_number = user.phone_number.present? ? user.phone_number : ''
             email = user.email.present? ? user.email : ''
@@ -921,19 +921,19 @@ class EventsController < ApplicationController
             end
             @event_admin = EventAdmins.find_by_event_id_and_user_id(@event.id, invitation.participant_id)
             is_admin = @event_admin.present? ? true : false
-          end
-          if (reaching_time == 0)
-            at_the_venue_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
-          elsif (reaching_time > 3600)
-            above_60_min_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
-          elsif reaching_time < 3600 && reaching_time > 1800
-            below_60_min_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
-          elsif reaching_time < 1800 && reaching_time > 600
-            below_30_min_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
-          elsif  reaching_time < 600 && reaching_time > 0
-            below_10_min_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
-          else
-            unknown_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
+            if (reaching_time == 0)
+              at_the_venue_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
+            elsif (reaching_time > 3600)
+              above_60_min_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
+            elsif reaching_time < 3600 && reaching_time > 1800
+              below_60_min_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
+            elsif reaching_time < 1800 && reaching_time > 600
+              below_30_min_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
+            elsif  reaching_time < 600 && reaching_time > 0
+              below_10_min_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
+            else
+              unknown_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
+            end
           end
         end
 
