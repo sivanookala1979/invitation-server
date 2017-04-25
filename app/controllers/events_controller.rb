@@ -866,7 +866,7 @@ class EventsController < ApplicationController
     @event = Event.find_by_id(params[:event_id])
     event_all_invitees=[]
     if @event.present?
-      invitations = Invitation.where("event_id =? and is_accepted=? and is_blocked=? and is_rejected=?", @event.id, true, false, false)
+      invitations = Invitation.where("event_id =? and is_accepted=? and is_blocked=? and is_rejected =? and participant_id=?", @event.id, true, false, false,!@event.owner_id)
       if invitations.size > 0
 
         at_the_venue_invitees_details = EventInviteesDetails.new
@@ -945,11 +945,11 @@ class EventsController < ApplicationController
         unknown_invitees_details.total_invitees = unknown_invitees_details.invitees_list.size
 
         event_all_invitees << at_the_venue_invitees_details
-        event_all_invitees << unknown_invitees_details
         event_all_invitees << below_10_min_invitees_details
         event_all_invitees << below_30_min_invitees_details
         event_all_invitees << below_60_min_invitees_details
         event_all_invitees << above_60_min_invitees_details
+        event_all_invitees << unknown_invitees_details
       end
     end
     respond_to do |format|
