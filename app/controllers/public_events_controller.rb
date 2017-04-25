@@ -116,7 +116,7 @@ class PublicEventsController < ApplicationController
     public_event = PublicEvent.find_by_id(params[:public_event_id]) if params[:public_event_id].present?
     city = City.find_by_id(params[:city_id]) if params[:city_id].present?
     if user.present? && public_event.present? && city.present?
-      @favourite = Favourites.find_by_event_id_and_city_id_user_id(public_event.id, city.id, user.id)
+      @favourite = Favourites.find_by_event_id_and_city_id_and_user_id(public_event.id, city.id, user.id)
       if @favourite.blank?
         @favourite = Favourites.new
         @favourite.user_id = user.id
