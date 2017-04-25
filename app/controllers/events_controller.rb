@@ -685,7 +685,8 @@ class EventsController < ApplicationController
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
     if @user.present?
-      event_information = []
+      present_event_information = []
+      expire_event_information = []
       @my_events = Event.find_all_by_owner_id_and_hide(@user.id,false)
       @my_invitation_events = Invitation.where("participant_id =? and is_blocked =? and is_rejected =?" ,@user.id,false,false)
       my_invitation_event_ids = []
@@ -739,13 +740,19 @@ class EventsController < ApplicationController
           end
 
         end
-        event_information << Event_information.new(event.id, event.event_name, event.start_date, event.end_date, event.latitude, event.longitude, event.address, event.invitees_count, event.accepted_count, event.rejected_count, event.check_in_count, event.is_manual_check_in, img_url, event.description, event.private, event.remainder, event.status, event.owner_id, event.is_recurring_event, event.recurring_type, is_admin, is_expire, event.event_theme, is_my_event,is_accepted, owner_information, invitation_information)
+        if event.end_date > Time.now
+          present_event_information << Event_information.new(event.id, event.event_name, event.start_date, event.end_date, event.latitude, event.longitude, event.address, event.invitees_count, event.accepted_count, event.rejected_count, event.check_in_count, event.is_manual_check_in, img_url, event.description, event.private, event.remainder, event.status, event.owner_id, event.is_recurring_event, event.recurring_type, is_admin, is_expire, event.event_theme, is_my_event,is_accepted, owner_information, invitation_information)
+        else
+        expire_event_information << Event_information.new(event.id, event.event_name, event.start_date, event.end_date, event.latitude, event.longitude, event.address, event.invitees_count, event.accepted_count, event.rejected_count, event.check_in_count, event.is_manual_check_in, img_url, event.description, event.private, event.remainder, event.status, event.owner_id, event.is_recurring_event, event.recurring_type, is_admin, is_expire, event.event_theme, is_my_event,is_accepted, owner_information, invitation_information)
+         end
       end
     end
 
     if request.format == 'json'
-      if @user.present?
-        render :json => {:event_information => event_information}
+      if @user.present? && params[:expire].present?
+        render :json => {:event_information => expire_event_information}
+      elsif @user.present?
+        render :json => {:event_information => present_event_information}
       else
         render :json => {:status => "Invalid Authentication you are not allow to do this action"}
       end
