@@ -868,71 +868,89 @@ class EventsController < ApplicationController
     if @event.present?
       invitations = Invitation.where("event_id =? and is_accepted=? and is_blocked=? and is_rejected=?", @event.id, true, false, false)
       if invitations.size > 0
-      below_10_min_invitees_details = EventInviteesDetails.new
-      below_10_min_invitees_details.title='5-10 Min'
-      below_10_min_invitees_details.invitees_list=[]
 
-      below_30_min_invitees_details = EventInviteesDetails.new
-      below_30_min_invitees_details.title='10-20 Min'
-      below_30_min_invitees_details.invitees_list=[]
+        at_the_venue_invitees_details = EventInviteesDetails.new
+        at_the_venue_invitees_details.title ='At the venue'
+        at_the_venue_invitees_details.invitees_list=[]
 
-      below_60_min_invitees_details = EventInviteesDetails.new
-      below_60_min_invitees_details.title='20-30 Min'
-      below_60_min_invitees_details.invitees_list=[]
+        below_10_min_invitees_details = EventInviteesDetails.new
+        below_10_min_invitees_details.title='Below 10-min '
+        below_10_min_invitees_details.invitees_list=[]
 
-      above_60_min_invitees_details = EventInviteesDetails.new
-      above_60_min_invitees_details.title='Accepted'
-      above_60_min_invitees_details.invitees_list=[]
-      invitations.each do |invitation|
-        user = User.find_by_id(invitation.participant_id)
-        if user.present?
-          user_name = user.user_name.present? ? user.user_name : ''
-          mobile_number = user.phone_number.present? ? user.phone_number : ''
-          email = user.email.present? ? user.email : ''
-          img_url = (image = Images.find_by_id(user.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
-          user_location = UserLocation.where('user_id=?', invitation.participant_id).last
-          distance =""
-          update_at=""
-          reaching_time = 0
-          if user_location.present?
-            distance= getDistanceFromLatLonInKm(@event.latitude, @event.longitude, user_location.latitude, user_location.longitude)
-            update_at=distance_of_time_in_words(user_location.time, Time.now)
-            response =HTTParty.get("https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=#{@event.latitude},#{@event.longitude}&destinations=#{user_location.latitude},#{user_location.longitude}&sensor=false")
-            rows = response['rows'] if response.present?
-            if rows.present?
-              rows.each do |row|
-                row['elements'].each do |element|
-                  if (element['status'].present? && element['status'].eql?("OK"))
-                    reaching_time = element['duration']['value'] if element['duration']['value'].present?
+        below_30_min_invitees_details = EventInviteesDetails.new
+        below_30_min_invitees_details.title='Below 30-min'
+        below_30_min_invitees_details.invitees_list=[]
+
+        below_60_min_invitees_details = EventInviteesDetails.new
+        below_60_min_invitees_details.title='Below 1-hour'
+        below_60_min_invitees_details.invitees_list=[]
+
+        above_60_min_invitees_details = EventInviteesDetails.new
+        above_60_min_invitees_details.title='above 1-hour'
+        above_60_min_invitees_details.invitees_list=[]
+
+        unknown_invitees_details = EventInviteesDetails.new
+        unknown_invitees_details.title='Unknown'
+        unknown_invitees_details.invitees_list=[]
+
+        invitations.each do |invitation|
+          user = User.find_by_id(invitation.participant_id)
+          if user.present?
+            user_name = user.user_name.present? ? user.user_name : ''
+            mobile_number = user.phone_number.present? ? user.phone_number : ''
+            email = user.email.present? ? user.email : ''
+            img_url = (image = Images.find_by_id(user.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+            user_location = UserLocation.where('user_id=?', invitation.participant_id).last
+            distance =""
+            update_at=""
+            reaching_time = -1
+            if user_location.present?
+              distance= getDistanceFromLatLonInKm(@event.latitude, @event.longitude, user_location.latitude, user_location.longitude)
+              update_at=distance_of_time_in_words(user_location.time, Time.now)
+              response =HTTParty.get("https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=#{@event.latitude},#{@event.longitude}&destinations=#{user_location.latitude},#{user_location.longitude}&sensor=false")
+              rows = response['rows'] if response.present?
+              if rows.present?
+                rows.each do |row|
+                  row['elements'].each do |element|
+                    if (element['status'].present? && element['status'].eql?("OK"))
+                      reaching_time = element['duration']['value'] if element['duration']['value'].present?
+                    end
                   end
                 end
               end
             end
+            @event_admin = EventAdmins.find_by_event_id_and_user_id(@event.id, invitation.participant_id)
+            is_admin = @event_admin.present? ? true : false
           end
-          @event_admin = EventAdmins.find_by_event_id_and_user_id(@event.id, invitation.participant_id)
-          is_admin = @event_admin.present? ? true : false
+          if (reaching_time == 0)
+            at_the_venue_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
+          elsif (reaching_time > 3600)
+            above_60_min_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
+          elsif reaching_time < 3600 && reaching_time > 1800
+            below_60_min_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
+          elsif reaching_time < 1800 && reaching_time > 600
+            below_30_min_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
+          elsif  reaching_time < 600 && reaching_time > 0
+            below_10_min_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
+          else
+            unknown_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
+          end
         end
 
-        if (reaching_time > 3600) || reaching_time == 0
-          above_60_min_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
-        elsif reaching_time < 3600 && reaching_time > 1800
-          below_60_min_invitees_details.invitees_list  << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
-        elsif reaching_time < 1800 && reaching_time > 600
-          below_30_min_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
-        elsif  reaching_time < 600 && reaching_time > 0
-          below_10_min_invitees_details.invitees_list << EventInvitations.new(user_name, mobile_number, email, invitation.participant_id, img_url, distance, update_at, is_admin)
-        end
+        at_the_venue_invitees_details.total_invitees = below_10_min_invitees_details.invitees_list.size
+        below_10_min_invitees_details.total_invitees = below_10_min_invitees_details.invitees_list.size
+        below_30_min_invitees_details.total_invitees = below_30_min_invitees_details.invitees_list.size
+        below_60_min_invitees_details.total_invitees = below_60_min_invitees_details.invitees_list.size
+        above_60_min_invitees_details.total_invitees = above_60_min_invitees_details.invitees_list.size
+        unknown_invitees_details.total_invitees = unknown_invitees_details.invitees_list.size
+
+        event_all_invitees << at_the_venue_invitees_details
+        event_all_invitees << unknown_invitees_details
+        event_all_invitees << below_10_min_invitees_details
+        event_all_invitees << below_30_min_invitees_details
+        event_all_invitees << below_60_min_invitees_details
+        event_all_invitees << above_60_min_invitees_details
       end
-      below_10_min_invitees_details.total_invitees = below_10_min_invitees_details.invitees_list.size
-      below_30_min_invitees_details.total_invitees = below_30_min_invitees_details.invitees_list.size
-      below_60_min_invitees_details.total_invitees = below_60_min_invitees_details.invitees_list.size
-      above_60_min_invitees_details.total_invitees = above_60_min_invitees_details.invitees_list.size
-
-      event_all_invitees << below_10_min_invitees_details
-      event_all_invitees << below_30_min_invitees_details
-      event_all_invitees << below_60_min_invitees_details
-      event_all_invitees << above_60_min_invitees_details
-    end
     end
     respond_to do |format|
       format.json { render :json => {:all_invitees_list => event_all_invitees} }
