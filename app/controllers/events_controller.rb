@@ -870,23 +870,23 @@ class EventsController < ApplicationController
       if invitations.size > 0
 
         at_the_venue_invitees_details = EventInviteesDetails.new
-        at_the_venue_invitees_details.title ='At venue'
+        at_the_venue_invitees_details.title ='At-venue'
         at_the_venue_invitees_details.invitees_list=[]
 
         below_10_min_invitees_details = EventInviteesDetails.new
-        below_10_min_invitees_details.title='< 10-min '
+        below_10_min_invitees_details.title='<10-min'
         below_10_min_invitees_details.invitees_list=[]
 
         below_30_min_invitees_details = EventInviteesDetails.new
-        below_30_min_invitees_details.title='< 30-min'
+        below_30_min_invitees_details.title='<30-min'
         below_30_min_invitees_details.invitees_list=[]
 
         below_60_min_invitees_details = EventInviteesDetails.new
-        below_60_min_invitees_details.title='< 1-hour'
+        below_60_min_invitees_details.title='<1-hour'
         below_60_min_invitees_details.invitees_list=[]
 
         above_60_min_invitees_details = EventInviteesDetails.new
-        above_60_min_invitees_details.title='> 1-hour'
+        above_60_min_invitees_details.title='>1-hour'
         above_60_min_invitees_details.invitees_list=[]
 
         unknown_invitees_details = EventInviteesDetails.new
