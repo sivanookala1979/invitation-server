@@ -381,7 +381,7 @@ class EventsController < ApplicationController
 
   def event_invitations
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
-    @user = User.find_by_id(127) if !user_access_token.present?
+    @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
     event = Event.find(params[:id]) if @user.present?
     invitation_details_list=[]
     if event.present?
