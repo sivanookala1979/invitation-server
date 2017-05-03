@@ -720,6 +720,7 @@ class EventsController < ApplicationController
         @invitations = Invitation.find_all_by_event_id_and_is_blocked_and_is_accepted(event.id,false,true) if !is_admin
         invitation_information = []
         @invitations.each do |invitation|
+          if !event.owner_id.eql?(invitation.participant_id)
           invitation_details = InvitationDetails.new
           invitation_details.is_accepted= invitation.is_accepted ? true : false
           user = User.find_by_id(invitation.participant_id)
@@ -739,6 +740,7 @@ class EventsController < ApplicationController
             invitation_details.is_admin = @event_admin.present? ? true : false
             invitation_details.is_blocked = invitation.is_blocked
             invitation_information<<invitation_details
+          end
           end
 
         end
