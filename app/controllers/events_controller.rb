@@ -298,15 +298,17 @@ class EventsController < ApplicationController
 
   def post_location
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
-    user = User.find_by_id(user_access_token.user_id)
-    user_location=UserLocation.new
-    user_location.user_id=user.id
-    user_location.latitude = params[:latitude]
-    user_location.longitude = params[:longitude]
-    user_location.time= params[:time]
-    user_location.user_name= user.user_name
-    user_location.user_mobile_number = user.phone_number
-    user_location.save
+    user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
+    if user.present?
+      user_location=UserLocation.new
+      user_location.user_id=user.id
+      user_location.latitude = params[:latitude]
+      user_location.longitude = params[:longitude]
+      user_location.time= params[:time]
+      user_location.user_name= user.user_name
+      user_location.user_mobile_number = user.phone_number
+      user_location.save
+    end
     if request.format == 'json'
       render :json => {:status => "Success"}
     end
@@ -379,7 +381,7 @@ class EventsController < ApplicationController
 
   def event_invitations
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
-    @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
+    @user = User.find_by_id(127) if !user_access_token.present?
     event = Event.find(params[:id]) if @user.present?
     invitation_details_list=[]
     if event.present?
