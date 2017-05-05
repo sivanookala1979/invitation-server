@@ -101,7 +101,7 @@ class EventsController < ApplicationController
         event_admins.save
       end
       if params[:event_id].blank?
-        notification(new_event.owner_id, new_event.id, "Your event is created with the name #{new_event.event_name}.")
+       # notification(new_event.owner_id, new_event.id, "Your event is created with the name #{new_event.event_name}.")
       else
         notification(user.id, new_event.id, "Your are edited the event with the name #{new_event.event_name}.")
         notification(new_event.owner_id, new_event.id, "#{user.user_name} Is edited  Your event with the name #{new_event.event_name}.")
@@ -756,9 +756,9 @@ class EventsController < ApplicationController
 
     if request.format == 'json'
       if @user.present? && params[:expire].present?
-        render :json => {:event_information => expire_event_information}
+        render :json => {:event_information => expire_event_information.sort_by{ |i| i.start_date}}
       elsif @user.present?
-        render :json => {:event_information => present_event_information}
+        render :json => {:event_information => present_event_information.sort_by{ |i| i.start_date}}
       else
         render :json => {:status => "Invalid Authentication you are not allow to do this action"}
       end
