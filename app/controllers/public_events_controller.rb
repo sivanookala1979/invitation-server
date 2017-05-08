@@ -103,7 +103,7 @@ class PublicEventsController < ApplicationController
       service = Service.find_by_id(event.service_id).try(:name)
       img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
       is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id,user.id)).present? ? true : false
-      @public_events << PublicEventsList.new(event.id,event.event_name,event.event_theme,event.start_time,event.end_time,event.entry_fee,event.description,event.address,event.is_weekend,city,service,img_url,is_favourite)
+      @public_events << PublicEventsList.new(event.id,event.event_name,event.event_theme,event.start_time,event.end_time,event.entry_fee,event.description,event.address,event.is_weekend,city,service,img_url,is_favourite,event.views)
     end
     respond_to do |format|
       format.json { render :json => {:public_events => @public_events} }
@@ -148,7 +148,7 @@ class PublicEventsController < ApplicationController
           service = Service.find_by_id(event.service_id).try(:name)
           img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
           is_favourite = user.present? && (fav = Favourites.find_by_event_id_and_user_id(event.id,user.id)).present? ? true : false
-          @favourite_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url,is_favourite)
+          @favourite_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url,is_favourite,event.views)
         end
       end
     end
@@ -173,7 +173,7 @@ class PublicEventsController < ApplicationController
         service = Service.find_by_id(event.service_id).try(:name)
         img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
         is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id,user.id)).present? ? true : false
-        @free_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url,is_favourite)
+        @free_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url,is_favourite,event.views)
       end
     end
     respond_to do |format|
@@ -192,11 +192,41 @@ class PublicEventsController < ApplicationController
         service = Service.find_by_id(event.service_id).try(:name)
         img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
         is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id,user.id)).present? ? true : false
-        @weekend_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url,is_favourite)
+        @weekend_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url,is_favourite,event.views)
       end
     end
     respond_to do |format|
       format.json { render :json => {:weekend_events => @weekend_events} }
+    end
+  end
+
+  def remove_favourite_event
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
+    public_event = PublicEvent.find_by_id(params[:public_event_id]) if params[:public_event_id].present?
+    city = City.find_by_id(params[:city_id]) if params[:city_id].present?
+    if user.present?&& public_event.present?&& city.present?
+      @favourites = Favourites.find_by_event_id_and_city_id_and_user_id(public_event.id, city.id, user.id)
+      @favourite.destroy if @favourite.present?
+    end
+    respond_to do |format|
+      if user.present? && public_event.present? && city.present?
+        format.json { render :json => {:sttus => "Updated successfully "} }
+      else
+        format.json { render :json => {:error_message => "Invalid Authentication you are not allow to do this action"} }
+      end
+    end
+  end
+
+  def add_views
+    @public_event = PublicEvent.find_by_id(params[:public_event_id])
+    @public_event.update_attribute(:views, @public_event.views + 1) if @public_event.present?
+    respond_to do |format|
+      if @public_event.present?
+        format.json { render :json => {:sttus => "Updated successfully "} }
+      else
+        format.json { render :json => {:error_message => "Please try again."} }
+      end
     end
   end
 

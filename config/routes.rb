@@ -4,6 +4,8 @@ InvtappServer::Application.routes.draw do
   resources :public_events do
     get :get_public_events, :on => :collection
     get :add_favourite_event, :on => :collection
+    get :remove_favourite_event, :on => :collection
+    get :add_views, :on => :collection
     get :my_city_favourites, :on => :collection
     get :free_public_events, :on => :collection
     get :weekend_public_events, :on => :collection
