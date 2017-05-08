@@ -211,7 +211,7 @@ class PublicEventsController < ApplicationController
     end
     respond_to do |format|
       if user.present? && public_event.present? && city.present?
-        format.json { render :json => {:sttus => "Updated successfully "} }
+        format.json { render :json => {:status => "Updated successfully"} }
       else
         format.json { render :json => {:error_message => "Invalid Authentication you are not allow to do this action"} }
       end
@@ -223,7 +223,7 @@ class PublicEventsController < ApplicationController
     @public_event.update_attribute(:views, @public_event.views + 1) if @public_event.present?
     respond_to do |format|
       if @public_event.present?
-        format.json { render :json => {:sttus => "Updated successfully "} }
+        format.json { render :json => {:status => "Updated successfully"} }
       else
         format.json { render :json => {:error_message => "Please try again."} }
       end
