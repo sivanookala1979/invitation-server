@@ -8,6 +8,7 @@ InvtappServer::Application.routes.draw do
     get :add_views, :on => :collection
     get :my_city_favourites, :on => :collection
     get :free_public_events, :on => :collection
+    get :trending_events, :on => :collection
     get :weekend_public_events, :on => :collection
     get :cancel_public_events, :on => :collection
   end

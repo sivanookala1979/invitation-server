@@ -108,7 +108,39 @@ class PublicEventsController < ApplicationController
       end
     end
     respond_to do |format|
-      format.json { render :json => {:public_events => @public_events} }
+      if params[:trending].present?
+        format.json { render :json => {:public_events => @public_events.sort_by{ |i| i.views}.reverse! }}
+      else
+        format.json { render :json => {:public_events => @public_events} }
+      end
+
+    end
+  end
+
+  def trending_events
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
+    city = City.find_by_id(params[:city_id]) if params[:city_id].present?
+    if user.present? && city.present?
+      public_events = PublicEvent.where("city_id=? and is_active =?", city.id, true)
+      @public_events = []
+      public_events.each do |event|
+        @canceled_public_event = CanceledPublicEvents.find_by_event_id_and_canceled_user_id(event.id, user.id)
+        if @canceled_public_event.blank?
+          city = City.find_by_id(event.city_id).try(:name)
+          service = Service.find_by_id(event.service_id).try(:name)
+          img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+          is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id, user.id)).present? ? true : false
+          @public_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url, is_favourite, event.views)
+        end
+      end
+    end
+    respond_to do |format|
+      if user.present? && city.present?
+        format.json { render :json => {:public_events => @public_events.sort_by { |i| i.views }.reverse!} }
+      else
+        format.json { render :json => {:error_message => "Please try again."} }
+      end
     end
   end
 
@@ -190,9 +222,9 @@ class PublicEventsController < ApplicationController
   end
 
   def weekend_public_events
-    public_events = PublicEvent.where('is_active =? and is_weekend=? and city_id=?', true, true, params[:city_id]) if params[:city_id].present?
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
+    public_events = PublicEvent.where('is_active =? and is_weekend=? and city_id=?', true, true, params[:city_id]) if params[:city_id].present?
     @weekend_events = []
     if public_events.present?
       public_events.each do |event|
