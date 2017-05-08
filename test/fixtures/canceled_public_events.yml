@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  authour_id: 1
+  event_id: 1
+  canceled_user_id: 1
+
+two:
+  authour_id: 1
+  event_id: 1
+  canceled_user_id: 1

@@ -230,4 +230,24 @@ class PublicEventsController < ApplicationController
     end
   end
 
+  def cancel_public_events
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
+    @public_event = PublicEvent.find_by_id(params[:public_event_id]) if params[:public_event_id].present?
+    if user.present? && @public_event.present?
+      @canceled_public_event = CanceledPublicEvents.new
+      @canceled_public_event.canceled_user_id = user.id
+      @canceled_public_event.authour_id = 0;
+      @canceled_public_event.event_id = @public_event.id
+      @canceled_public_event.save
+    end
+    respond_to do |format|
+      if @canceled_public_event.present?
+        format.json { render :json => {:status => "Updated successfully"} }
+      else
+        format.json { render :json => {:error_message => "Please try again."} }
+      end
+    end
+  end
+
 end
