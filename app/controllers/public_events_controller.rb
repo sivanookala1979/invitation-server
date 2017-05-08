@@ -92,18 +92,20 @@ class PublicEventsController < ApplicationController
     end
   end
 
-
   def get_public_events
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
     public_events = PublicEvent.where('is_active =?', true).order('created_at ASC')
     @public_events = []
     public_events.each do |event|
-      city = City.find_by_id(event.city_id).try(:name)
-      service = Service.find_by_id(event.service_id).try(:name)
-      img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
-      is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id,user.id)).present? ? true : false
-      @public_events << PublicEventsList.new(event.id,event.event_name,event.event_theme,event.start_time,event.end_time,event.entry_fee,event.description,event.address,event.is_weekend,city,service,img_url,is_favourite,event.views)
+      @canceled_public_event = CanceledPublicEvents.find_by_event_id_and_canceled_user_id(event.id, user.id)
+      if @canceled_public_event.blank?
+        city = City.find_by_id(event.city_id).try(:name)
+        service = Service.find_by_id(event.service_id).try(:name)
+        img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+        is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id, user.id)).present? ? true : false
+        @public_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url, is_favourite, event.views)
+      end
     end
     respond_to do |format|
       format.json { render :json => {:public_events => @public_events} }
@@ -142,13 +144,16 @@ class PublicEventsController < ApplicationController
       favourites = Favourites.where('user_id =? and city_id =?', user.id, params[:city_id])
       @favourite_events = []
       favourites.each do |favourite|
-        event = PublicEvent.find_by_id(favourite.event_id)
-        if event.present?
-          city = City.find_by_id(event.city_id).try(:name)
-          service = Service.find_by_id(event.service_id).try(:name)
-          img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
-          is_favourite = user.present? && (fav = Favourites.find_by_event_id_and_user_id(event.id,user.id)).present? ? true : false
-          @favourite_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url,is_favourite,event.views)
+        @canceled_public_event = CanceledPublicEvents.find_by_event_id_and_canceled_user_id(favourite.event_id, user.id)
+        if @canceled_public_event.blank?
+          event = PublicEvent.find_by_id(favourite.event_id)
+          if event.present?
+            city = City.find_by_id(event.city_id).try(:name)
+            service = Service.find_by_id(event.service_id).try(:name)
+            img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+            is_favourite = user.present? && (fav = Favourites.find_by_event_id_and_user_id(event.id, user.id)).present? ? true : false
+            @favourite_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url, is_favourite, event.views)
+          end
         end
       end
     end
@@ -169,11 +174,14 @@ class PublicEventsController < ApplicationController
     @free_events = []
     if public_events.present?
       public_events.each do |event|
-        city = City.find_by_id(event.city_id).try(:name)
-        service = Service.find_by_id(event.service_id).try(:name)
-        img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
-        is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id,user.id)).present? ? true : false
-        @free_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url,is_favourite,event.views)
+        @canceled_public_event = CanceledPublicEvents.find_by_event_id_and_canceled_user_id(event.id, user.id)
+        if @canceled_public_event.blank?
+          city = City.find_by_id(event.city_id).try(:name)
+          service = Service.find_by_id(event.service_id).try(:name)
+          img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+          is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id, user.id)).present? ? true : false
+          @free_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url, is_favourite, event.views)
+        end
       end
     end
     respond_to do |format|
@@ -188,11 +196,14 @@ class PublicEventsController < ApplicationController
     @weekend_events = []
     if public_events.present?
       public_events.each do |event|
-        city = City.find_by_id(event.city_id).try(:name)
-        service = Service.find_by_id(event.service_id).try(:name)
-        img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
-        is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id,user.id)).present? ? true : false
-        @weekend_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url,is_favourite,event.views)
+        @canceled_public_event = CanceledPublicEvents.find_by_event_id_and_canceled_user_id(event.id, user.id)
+        if @canceled_public_event.blank?
+          city = City.find_by_id(event.city_id).try(:name)
+          service = Service.find_by_id(event.service_id).try(:name)
+          img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+          is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id, user.id)).present? ? true : false
+          @weekend_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url, is_favourite, event.views)
+        end
       end
     end
     respond_to do |format|
