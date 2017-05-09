@@ -3,6 +3,7 @@ class PublicEventsController < ApplicationController
   # GET /public_events.json
   include PublicEventsHelper
   include ApplicationHelper
+
   def index
     @public_events = PublicEvent.all
 
@@ -109,7 +110,7 @@ class PublicEventsController < ApplicationController
     end
     respond_to do |format|
       if params[:trending].present?
-        format.json { render :json => {:public_events => @public_events.sort_by{ |i| i.views}.reverse! }}
+        format.json { render :json => {:public_events => @public_events.sort_by { |i| i.views }.reverse!} }
       else
         format.json { render :json => {:public_events => @public_events} }
       end
@@ -319,7 +320,33 @@ class PublicEventsController < ApplicationController
     end
   end
 
-
-
+  def similar_events_list
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    user = User.find_by_id(127) if !user_access_token.present?
+    @public_event = PublicEvent.find_by_id(params[:public_event_id]) if params[:public_event_id].present?
+    if @public_event.present? && @public_event.service_id.present? && user.present?
+      similar_events_list = []
+      public_events = PublicEvent.find_all_by_service_id(@public_event.service_id)
+      if public_events.present?
+        public_events.each do |event|
+          @canceled_public_event = CanceledPublicEvents.find_by_event_id_and_canceled_user_id(event.id, user.id)
+          if @canceled_public_event.blank? && !@public_event.id.eql?(event.id)
+            city = City.find_by_id(event.city_id).try(:name)
+            service = Service.find_by_id(event.service_id).try(:name)
+            img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+            is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id, user.id)).present? ? true : false
+            similar_events_list << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url, is_favourite, event.views)
+          end
+        end
+      end
+    end
+    respond_to do |format|
+      if @public_event.present? && @public_event.service_id.present? && user.present?
+        format.json { render :json => {:similar_events_list => similar_events_list} }
+      else
+        format.json { render :json => {:error_message => "Invalid Authentication you are not allow to do this action"} }
+      end
+    end
+  end
 
 end
