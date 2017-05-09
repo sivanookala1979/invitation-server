@@ -223,7 +223,7 @@ class PublicEventsController < ApplicationController
 
   def public_events_with_search_keywords
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
-    user = User.find_by_id(127) if !user_access_token.present?
+    user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
     public_events = PublicEvent.where('is_active =? and city_id=? and keyword1 in(?) or keyword2 in(?) or keyword3 in(?) or keyword4 in(?) or keyword5 in(?)   or event_name in(?) or address in(?) ', true, params[:city_id], params[:keywords].split(','), params[:keywords].split(','), params[:keywords].split(','), params[:keywords].split(','), params[:keywords].split(','), params[:keywords].split(','), params[:keywords].split(',')) if params[:city_id].present? && params[:keywords].present?
     @searched_events = []
     if user.present?
