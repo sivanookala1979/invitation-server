@@ -58,6 +58,13 @@
           <%= f.text_field :entry_fee, :placeholder => 'Event Fee', :class => 'form-control' %>
         </div>
         <div class="form-group">
+          <%= f.label :offer_amount, :class => 'control-label' %>
+          <br/>
+          <%= f.text_field :offer_amount, :placeholder => 'Offer Amount', :class => 'form-control' %>
+        </div>
+
+
+        <div class="form-group">
           <%= f.label :total_tickets_for_booking, :class => 'control-label' %>
           <br/>
           <%= f.number_field :total_tickets_for_booking, :placeholder => 'Total Tickets For Booking', :class => 'form-control' %>
@@ -76,7 +83,7 @@
         <div class="form-group">
           <%= f.label :description, :class => 'control-label' %>
           <br/>
-          <%= f.text_area :description, :placeholder => 'Event Description', :class => 'form-control', size: "100x6" %>
+          <%= f.text_area :description, :placeholder => 'Event Description', :class => 'form-control', size: "100x2" %>
         </div>
         <div class="form-group">
           <span><%= f.label :is_active %></span> &nbsp;&nbsp;

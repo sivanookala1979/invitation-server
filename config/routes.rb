@@ -11,6 +11,7 @@ InvtappServer::Application.routes.draw do
     get :trending_events, :on => :collection
     get :similar_events_list, :on => :collection
     get :recommended_events_list, :on => :collection
+    get :offered_public_events, :on => :collection
     get :public_events_with_search_keywords, :on => :collection
     get :weekend_public_events, :on => :collection
     get :cancel_public_events, :on => :collection
