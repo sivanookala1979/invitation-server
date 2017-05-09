@@ -12,7 +12,7 @@
     <% end %>
 
     <div class="row">
-      <div class="col-sm-6">
+      <div class="col-sm-4">
         <div class="form-group">
           <%= f.label :event_name, :class => 'control-label' %>
           <br/>
@@ -24,37 +24,19 @@
           <%= f.text_field :event_theme, :placeholder => 'Event Theme', :class => 'form-control' %>
         </div>
         <div class="form-group">
-          <%= f.label :start_time , :class => 'control-label'%>
+          <%= f.label :start_time, :class => 'control-label' %>
           <br/>
           <%= f.datetime_select :start_time %>
         </div>
         <div class="form-group">
-          <%= f.label :end_time , :class => 'control-label'%>
+          <%= f.label :end_time, :class => 'control-label' %>
           <br/>
           <%= f.datetime_select :end_time %>
         </div>
         <div class="form-group">
-          <%= f.label :entry_fee, :class => 'control-label' %>
-          <br/>
-          <%= f.text_field :entry_fee, :placeholder => 'Event Fee', :class => 'form-control' %>
-        </div>
-        <div class="form-group">
           <%= f.label :city_id, :class => 'control-label' %>
           <br/>
-          <%= f.select(:city_id, options_for_select(City.all.collect { |u| [u.name, u.id] }, @public_event.city_id),{:prompt => 'Select city'}, :class => 'form-control ') %>
-        </div>
-        <div class="form-group">
-          <%= f.label :service_id, :class => 'control-label' %>
-          <br/>
-          <%= f.select(:service_id, options_for_select(Service.all.collect { |u| [u.name, u.id] }, @public_event.service_id),{:prompt => 'Select service Type'}, :class => 'form-control ' ) %>
-        </div>
-
-        </div>
-      <div class="col-sm-6">
-        <div class="form-group">
-          <%= f.label :description, :class => 'control-label' %>
-          <br/>
-          <%= f.text_area :description, :placeholder => 'Event Description', :class => 'form-control',:size=>"100*4" %>
+          <%= f.select(:city_id, options_for_select(City.all.collect { |u| [u.name, u.id] }, @public_event.city_id), {:prompt => 'Select city'}, :class => 'form-control ') %>
         </div>
         <div class="form-group">
           <%= f.label :address, :class => 'control-label' %>
@@ -62,26 +44,81 @@
           <%= f.text_field :address, :placeholder => 'Address', :class => 'form-control' %>
         </div>
         <div class="form-group">
+          <%= f.label :service_id, :class => 'control-label' %>
+          <br/>
+          <%= f.select(:service_id, options_for_select(Service.all.collect { |u| [u.name, u.id] }, @public_event.service_id), {:prompt => 'Select service Type'}, :class => 'form-control ') %>
+        </div>
+      </div>
+
+
+      <div class="col-sm-4">
+        <div class="form-group">
+          <%= f.label :entry_fee, :class => 'control-label' %>
+          <br/>
+          <%= f.text_field :entry_fee, :placeholder => 'Event Fee', :class => 'form-control' %>
+        </div>
+        <div class="form-group">
+          <%= f.label :total_tickets_for_booking, :class => 'control-label' %>
+          <br/>
+          <%= f.number_field :total_tickets_for_booking, :placeholder => 'Total Tickets For Booking', :class => 'form-control' %>
+        </div>
+        <div class="form-group">
+          <%= f.label :booking_available_from, :class => 'control-label' %>
+          <br/>
+          <%= f.datetime_select :booking_available_from %>
+        </div>
+        <div class="form-group">
+          <%= f.label :booking_closed_at, :class => 'control-label' %>
+          <br/>
+          <%= f.datetime_select :booking_closed_at %>
+        </div>
+
+        <div class="form-group">
+          <%= f.label :description, :class => 'control-label' %>
+          <br/>
+          <%= f.text_area :description, :placeholder => 'Event Description', :class => 'form-control', size: "100x6" %>
+        </div>
+        <div class="form-group">
+          <span><%= f.label :is_active %></span> &nbsp;&nbsp;
+
+          <span><%= f.check_box :is_active %></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span><%= f.label :is_weekend %></span>&nbsp;&nbsp;<span><%= f.check_box :is_active %></span>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="form-group">
+          <%= f.label :keywords1, :class => 'control-label' %>
+          <br/>
+          <%= f.text_field :keyword1, :placeholder => 'Search Keyword', :class => 'form-control' %>
+        </div>
+        <div class="form-group">
+          <%= f.label :keywords2, :class => 'control-label' %>
+          <br/>
+          <%= f.text_field :keyword2, :placeholder => 'Search Keyword', :class => 'form-control' %>
+        </div>
+        <div class="form-group">
+          <%= f.label :keywords3, :class => 'control-label' %>
+          <br/>
+          <%= f.text_field :keyword3, :placeholder => 'Search Keyword', :class => 'form-control' %>
+        </div>
+        <div class="form-group">
+          <%= f.label :keywords4, :class => 'control-label' %>
+          <br/>
+          <%= f.text_field :keyword4, :placeholder => 'Search Keyword', :class => 'form-control' %>
+        </div>
+        <div class="form-group">
+          <%= f.label :keywords5, :class => 'control-label' %>
+          <br/>
+          <%= f.text_field :keyword5, :placeholder => 'Search Keyword', :class => 'form-control' %>
+        </div>
+        <div class="form-group">
           <%= f.label :image_id, :class => 'control-label' %>
           <br/>
           <%= @public_event.image_id.present? ? image_tag(Images.find(@public_event.image_id).image_path.url(:small)) : "Yoo are not uploaded a picture existing" %>
           <%= f.file_field :image_id %>
         </div>
-
-        <div class="form-group">
-          <%= f.label :is_active %>
-          <br/>
-          <%= f.check_box :is_active %>
-        </div>
-        <div class="form-group">
-          <%= f.label :is_weekend %>
-          <br/>
-          <%= f.check_box :is_weekend %>
-        </div>
-        <div class="actions">
-          <%= f.submit(:class => 'btn btn-warning') %>
-        </div>
       </div>
-      </div>
+    </div>
+    <div class="actions">
+      <%= f.submit(:class => 'btn btn-warning') %>
     </div>
 <% end %>

@@ -221,6 +221,32 @@ class PublicEventsController < ApplicationController
     end
   end
 
+  def public_events_with_search_keywords
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    user = User.find_by_id(127) if !user_access_token.present?
+    public_events = PublicEvent.where('is_active =? and city_id=? and keyword1 in(?) or keyword2 in(?) or keyword3 in(?) or keyword4 in(?) or keyword5 in(?)   or event_name in(?) or address in(?) ', true, params[:city_id], params[:keywords].split(','), params[:keywords].split(','), params[:keywords].split(','), params[:keywords].split(','), params[:keywords].split(','), params[:keywords].split(','), params[:keywords].split(',')) if params[:city_id].present? && params[:keywords].present?
+    @searched_events = []
+    if user.present?
+      public_events.each do |event|
+        @canceled_public_event = CanceledPublicEvents.find_by_event_id_and_canceled_user_id(event.id, user.id)
+        if @canceled_public_event.blank?
+          city = City.find_by_id(event.city_id).try(:name)
+          service = Service.find_by_id(event.service_id).try(:name)
+          img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+          is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id, user.id)).present? ? true : false
+          @searched_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url, is_favourite, event.views)
+        end
+      end
+    end
+    respond_to do |format|
+      if user.present?
+        format.json { render :json => {:searched_events => public_events} }
+      else
+        format.json { render :json => {:error_message => "Invalid Authentication you are not allow to do this action"} }
+      end
+    end
+  end
+
   def weekend_public_events
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
@@ -292,5 +318,8 @@ class PublicEventsController < ApplicationController
       end
     end
   end
+
+
+
 
 end
