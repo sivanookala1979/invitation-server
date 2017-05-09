@@ -240,7 +240,7 @@ class PublicEventsController < ApplicationController
     end
     respond_to do |format|
       if user.present?
-        format.json { render :json => {:searched_events => public_events} }
+        format.json { render :json => {:searched_events => @searched_events} }
       else
         format.json { render :json => {:error_message => "Invalid Authentication you are not allow to do this action"} }
       end
