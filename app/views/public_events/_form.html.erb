@@ -82,6 +82,9 @@
           <span><%= f.label :is_active %></span> &nbsp;&nbsp;
 
           <span><%= f.check_box :is_active %></span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span><%= f.label :is_weekend %></span>&nbsp;&nbsp;<span><%= f.check_box :is_active %></span>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span><%= f.label :is_recommended %></span> &nbsp;&nbsp;
+
+          <span><%= f.check_box :is_recommended %></span>
         </div>
       </div>
       <div class="col-sm-4">
@@ -110,6 +113,10 @@
           <br/>
           <%= f.text_field :keyword5, :placeholder => 'Search Keyword', :class => 'form-control' %>
         </div>
+
+
+
+
         <div class="form-group">
           <%= f.label :image_id, :class => 'control-label' %>
           <br/>

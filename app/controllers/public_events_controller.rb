@@ -322,11 +322,11 @@ class PublicEventsController < ApplicationController
 
   def similar_events_list
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
-    user = User.find_by_id(127) if !user_access_token.present?
+    user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
     @public_event = PublicEvent.find_by_id(params[:public_event_id]) if params[:public_event_id].present?
-    if @public_event.present? && @public_event.service_id.present? && user.present?
+    if @public_event.present? && @public_event.service_id.present? && user.present? && params[:city_id].present?
       similar_events_list = []
-      public_events = PublicEvent.find_all_by_service_id(@public_event.service_id)
+      public_events = PublicEvent.find_all_by_service_id_and_city_id(@public_event.service_id,params[:city_id])
       if public_events.present?
         public_events.each do |event|
           @canceled_public_event = CanceledPublicEvents.find_by_event_id_and_canceled_user_id(event.id, user.id)
@@ -341,12 +341,41 @@ class PublicEventsController < ApplicationController
       end
     end
     respond_to do |format|
-      if @public_event.present? && @public_event.service_id.present? && user.present?
+      if @public_event.present? && @public_event.service_id.present? && user.present? && params[:city_id].present?
         format.json { render :json => {:similar_events_list => similar_events_list} }
       else
         format.json { render :json => {:error_message => "Invalid Authentication you are not allow to do this action"} }
       end
     end
   end
+
+  def recommended_events_list
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    user = User.find_by_id(user_access_token.user_id) if !user_access_token.present?
+    if user.present? && params[:city_id].present?
+      public_events = PublicEvent.find_all_by_city_id_and_is_recommended(params[:city_id], true)
+      recommended_events_list = []
+      if public_events.present?
+        public_events.each do |event|
+          @canceled_public_event = CanceledPublicEvents.find_by_event_id_and_canceled_user_id(event.id, user.id)
+          if @canceled_public_event.blank?
+            city = City.find_by_id(event.city_id).try(:name)
+            service = Service.find_by_id(event.service_id).try(:name)
+            img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
+            is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id, user.id)).present? ? true : false
+            recommended_events_list << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.description, event.address, event.is_weekend, city, service, img_url, is_favourite, event.views)
+          end
+        end
+      end
+    end
+    respond_to do |format|
+      if user.present? && params[:city_id].present?
+        format.json { render :json => {:recommended_events_list => recommended_events_list} }
+      else
+        format.json { render :json => {:error_message => "Invalid Authentication you are not allow to do this action"} }
+      end
+    end
+  end
+
 
 end
