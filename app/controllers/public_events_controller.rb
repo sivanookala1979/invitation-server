@@ -351,7 +351,7 @@ class PublicEventsController < ApplicationController
 
   def recommended_events_list
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
-    user = User.find_by_id(user_access_token.user_id) if !user_access_token.present?
+    user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
     if user.present? && params[:city_id].present?
       public_events = PublicEvent.find_all_by_city_id_and_is_recommended(params[:city_id], true)
       recommended_events_list = []
