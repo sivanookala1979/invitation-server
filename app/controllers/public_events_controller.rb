@@ -381,7 +381,7 @@ class PublicEventsController < ApplicationController
     user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
     user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
     if user.present? && params[:city_id].present?
-      public_events = PublicEvent.where("city_id=? and offer_amount >=", params[:city_id], 0.0)
+      public_events = PublicEvent.where("city_id=? and offer_amount >?", params[:city_id], 0.0)
       offered_public_events = []
       if public_events.present?
         public_events.each do |event|
