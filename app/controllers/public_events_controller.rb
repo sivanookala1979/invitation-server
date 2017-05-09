@@ -226,7 +226,7 @@ class PublicEventsController < ApplicationController
     user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
     public_events = PublicEvent.where('is_active =? and city_id=? and keyword1 in(?) or keyword2 in(?) or keyword3 in(?) or keyword4 in(?) or keyword5 in(?)   or event_name in(?) or address in(?) ', true, params[:city_id], params[:keywords].split(','), params[:keywords].split(','), params[:keywords].split(','), params[:keywords].split(','), params[:keywords].split(','), params[:keywords].split(','), params[:keywords].split(',')) if params[:city_id].present? && params[:keywords].present?
     @searched_events = []
-    if user.present?
+    if user.present? && public_events.present?
       public_events.each do |event|
         @canceled_public_event = CanceledPublicEvents.find_by_event_id_and_canceled_user_id(event.id, user.id)
         if @canceled_public_event.blank?
