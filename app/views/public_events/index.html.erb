@@ -15,6 +15,8 @@
     <th>Description</th>
     <th>Image</th>
     <th>Address</th>
+    <th>Latitude</th>
+    <th>Longitude</th>
     <th>Is active</th>
     <th></th>
     <th></th>
@@ -32,6 +34,8 @@
     <td><%= public_event.description %></td>
     <td><%= public_event.image_id %></td>
     <td><%= public_event.address %></td>
+    <td><%= public_event.latitude %></td>
+    <td><%= public_event.longitude %></td>
     <td><%= public_event.is_active %></td>
     <td><%= link_to 'Edit', edit_public_event_path(public_event) %></td>
     <td><%= link_to 'Destroy', public_event, confirm: 'Are you sure?', method: :delete %></td>

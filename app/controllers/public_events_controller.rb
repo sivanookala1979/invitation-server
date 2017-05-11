@@ -105,7 +105,7 @@ class PublicEventsController < ApplicationController
         service = Service.find_by_id(event.service_id).try(:name)
         img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
         is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id, user.id)).present? ? true : false
-        @public_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee,event.offer_amount, event.description, event.address, event.is_weekend, city, service, img_url, is_favourite, event.views)
+        @public_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee,event.offer_amount, event.description, event.address,event.latitude,event.longitude, event.is_weekend, city, service, img_url, is_favourite, event.views)
       end
     end
     respond_to do |format|
@@ -132,7 +132,7 @@ class PublicEventsController < ApplicationController
           service = Service.find_by_id(event.service_id).try(:name)
           img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
           is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id, user.id)).present? ? true : false
-          @public_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee,event.offer_amount, event.description, event.address, event.is_weekend, city, service, img_url, is_favourite, event.views)
+          @public_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee,event.offer_amount, event.description, event.address,event.latitude,event.longitude, event.is_weekend, city, service, img_url, is_favourite, event.views)
         end
       end
     end
@@ -185,7 +185,7 @@ class PublicEventsController < ApplicationController
             service = Service.find_by_id(event.service_id).try(:name)
             img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
             is_favourite = user.present? && (fav = Favourites.find_by_event_id_and_user_id(event.id, user.id)).present? ? true : false
-            @favourite_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee,event.offer_amount, event.description, event.address, event.is_weekend, city, service, img_url, is_favourite, event.views)
+            @favourite_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee,event.offer_amount, event.description, event.address,event.latitude,event.longitude, event.is_weekend, city, service, img_url, is_favourite, event.views)
           end
         end
       end
@@ -213,7 +213,7 @@ class PublicEventsController < ApplicationController
           service = Service.find_by_id(event.service_id).try(:name)
           img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
           is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id, user.id)).present? ? true : false
-          @free_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee,event.offer_amount, event.description, event.address, event.is_weekend, city, service, img_url, is_favourite, event.views)
+          @free_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee,event.offer_amount, event.description, event.address,event.latitude,event.longitude, event.is_weekend, city, service, img_url, is_favourite, event.views)
         end
       end
     end
@@ -235,7 +235,7 @@ class PublicEventsController < ApplicationController
           service = Service.find_by_id(event.service_id).try(:name)
           img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
           is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id, user.id)).present? ? true : false
-          @searched_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee,event.offer_amount, event.description, event.address, event.is_weekend, city, service, img_url, is_favourite, event.views)
+          @searched_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee,event.offer_amount, event.description, event.address,event.latitude,event.longitude, event.is_weekend, city, service, img_url, is_favourite, event.views)
         end
       end
     end
@@ -261,7 +261,7 @@ class PublicEventsController < ApplicationController
           service = Service.find_by_id(event.service_id).try(:name)
           img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
           is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id, user.id)).present? ? true : false
-          @weekend_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee,event.offer_amount, event.description, event.address, event.is_weekend, city, service, img_url, is_favourite, event.views)
+          @weekend_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee,event.offer_amount, event.description, event.address,event.latitude,event.longitude, event.is_weekend, city, service, img_url, is_favourite, event.views)
         end
       end
     end
@@ -335,7 +335,7 @@ class PublicEventsController < ApplicationController
             service = Service.find_by_id(event.service_id).try(:name)
             img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
             is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id, user.id)).present? ? true : false
-            similar_events_list << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee,event.offer_amount, event.description, event.address, event.is_weekend, city, service, img_url, is_favourite, event.views)
+            similar_events_list << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee,event.offer_amount, event.description, event.address,event.latitude,event.longitude, event.is_weekend, city, service, img_url, is_favourite, event.views)
           end
         end
       end
@@ -363,7 +363,7 @@ class PublicEventsController < ApplicationController
             service = Service.find_by_id(event.service_id).try(:name)
             img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
             is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id, user.id)).present? ? true : false
-            recommended_events_list << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee,event.offer_amount, event.description, event.address, event.is_weekend, city, service, img_url, is_favourite, event.views)
+            recommended_events_list << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee,event.offer_amount, event.description, event.address,event.latitude,event.longitude, event.is_weekend, city, service, img_url, is_favourite, event.views)
           end
         end
       end
@@ -391,7 +391,7 @@ class PublicEventsController < ApplicationController
             service = Service.find_by_id(event.service_id).try(:name)
             img_url = (image = Images.find_by_id(event.image_id)).present? ? ApplicationHelper.get_root_url+image.image_path.url(:original) : ''
             is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id, user.id)).present? ? true : false
-            offered_public_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.offer_amount, event.description, event.address, event.is_weekend, city, service, img_url, is_favourite, event.views)
+            offered_public_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee, event.offer_amount, event.description, event.address,event.latitude,event.longitude, event.is_weekend, city, service, img_url, is_favourite, event.views)
           end
         end
       end
