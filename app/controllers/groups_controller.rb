@@ -126,10 +126,9 @@ class GroupsController < ApplicationController
       group_information = []
       group_ids.each do |group_id|
         @group = Group.find_by_id(group_id)
-        @group_members = GroupMembers.find_all_by_group_id(group_id)
-
-        user = User.find_by_id(@group.owner_id)
-        group_information << GroupInformation.new(@group.id, @group.group_name, user.user_name, @group.owner_id, user.phone_number, @group.created_at)
+        #@group_members = GroupMembers.find_all_by_group_id(group_id)
+          user = User.find_by_id(@group.owner_id) if @group.present?
+          group_information << GroupInformation.new(@group.id, @group.group_name, user.user_name, @group.owner_id, user.phone_number, @group.created_at) if user.present?
       end
     end
     if request.format == 'json'
