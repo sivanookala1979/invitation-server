@@ -98,6 +98,7 @@ class PublicEventsController < ApplicationController
     user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
     public_events = PublicEvent.where('is_active =?', true).order('created_at ASC')
     @public_events = []
+    if user.present? && public_events.present?
     public_events.each do |event|
       @canceled_public_event = CanceledPublicEvents.find_by_event_id_and_canceled_user_id(event.id, user.id)
       if @canceled_public_event.blank?
@@ -107,6 +108,7 @@ class PublicEventsController < ApplicationController
         is_favourite = user.present? && (favourite = Favourites.find_by_event_id_and_user_id(event.id, user.id)).present? ? true : false
         @public_events << PublicEventsList.new(event.id, event.event_name, event.event_theme, event.start_time, event.end_time, event.entry_fee,event.offer_amount, event.description, event.address,event.latitude,event.longitude, event.is_weekend, city, service, img_url, is_favourite, event.views)
       end
+    end
     end
     respond_to do |format|
       if params[:trending].present?
