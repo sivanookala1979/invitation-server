@@ -183,6 +183,43 @@ class UsersController < ApplicationController
     @user_locations = UserLocation.where("user_id=?", params[:user_id]).order('created_at DESC')
   end
 
+  def get_my_settings
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
+    @user_setting = UserSetting.find_by_user_id(@user.id) if @user.present?
+    respond_to do |format|
+      if @user_setting.present?
+        format.json { render :json => {:user_settings => @user_setting} }
+      else
+        format.json { render :json => {:error_message => "please check once something is not a valid."} }
+      end
+    end
+  end
+
+  def update_my_settings
+    user_access_token = UserAccessTokens.find_by_access_token(request.headers['Authorization'])
+    @user = User.find_by_id(user_access_token.user_id) if user_access_token.present?
+    if @user.present?
+      @user_setting = UserSetting.find_by_user_id(@user.id)
+      @user_setting = UserSetting.new if @user_setting.blank?
+      @user_setting.user_id = @user.id
+      @user_setting.share_location_with_host = params[:share_location_with_host].present? ? params[:share_location_with_host] : @user_setting.share_location_with_host
+      @user_setting.share_locattion_with_guest = params[:share_locattion_with_guest].present? ? params[:share_locattion_with_guest] : @user_setting.share_locattion_with_guest
+      @user_setting.invitations = params[:invitations].present? ? params[:invitations] : @user_setting.invitations
+      @user_setting.reminders = params[:reminders].present? ? params[:reminders] : @user_setting.reminders
+      @user_setting.comments = params[:comments].present? ? params[:comments] : @user_setting.comments
+      @user_setting.save
+    end
+    respond_to do |format|
+      if @user_setting.present?
+        format.json { render :json => {:user_settings => @user_setting} }
+      else
+        format.json { render :json => {:error_message => "please check once something is not a valid."} }
+      end
+    end
+  end
+
+
 
 
 end
